@@ -1,0 +1,2487 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 課程初探｜生成式 AI 歌曲創作 × 影片剪輯 互動學習網頁</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-tc/400.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-tc/500.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-tc/700.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-tc/900.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/noto-serif-tc/700.css">
+<style>
+:root{
+  --f-sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --f-serif:"Noto Serif TC","Songti TC",serif;
+  --r-s:10px; --r-m:16px; --r-l:24px; --side:288px;
+  --ease:cubic-bezier(.22,.75,.25,1);
+}
+html[data-theme="dark"]{
+  --bg:#07070f; --bg2:#0d0d1c; --panel:rgba(255,255,255,.045);
+  --panel2:rgba(255,255,255,.07); --line:rgba(255,255,255,.10);
+  --tx:#eceaf6; --tx2:#a8a4c0; --tx3:#6f6b8a;
+  --acc:#a855f7; --acc2:#22d3ee; --acc3:#f472b6; --ok:#34d399; --warn:#fbbf24; --bad:#fb7185;
+  --shadow:0 24px 60px -24px rgba(0,0,0,.85); --grid:rgba(255,255,255,.035);
+}
+html[data-theme="light"]{
+  --bg:#f5f4fb; --bg2:#ffffff; --panel:rgba(255,255,255,.9);
+  --panel2:rgba(120,90,200,.06); --line:rgba(30,20,70,.12);
+  --tx:#191533; --tx2:#55506f; --tx3:#8b86a3;
+  --acc:#8b2fe0; --acc2:#0e93ad; --acc3:#db2777; --ok:#0d9464; --warn:#b45309; --bad:#e11d48;
+  --shadow:0 20px 50px -26px rgba(60,30,120,.35); --grid:rgba(30,20,70,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:88px}
+body{
+  font-family:var(--f-sans);background:var(--bg);color:var(--tx);line-height:1.75;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+  background-image:
+    radial-gradient(900px 520px at 12% -6%, color-mix(in srgb,var(--acc) 22%, transparent), transparent 60%),
+    radial-gradient(760px 460px at 96% 4%, color-mix(in srgb,var(--acc2) 16%, transparent), transparent 60%),
+    linear-gradient(var(--grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:auto,auto,52px 52px,52px 52px;background-attachment:fixed;
+  transition:background .4s var(--ease),color .4s var(--ease);
+}
+::selection{background:color-mix(in srgb,var(--acc) 45%,transparent);color:#fff}
+a{color:inherit;text-decoration:none}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--acc) 40%,transparent);border-radius:20px;border:2px solid transparent;background-clip:content-box}
+
+.topbar{position:fixed;inset:0 0 auto 0;z-index:90;height:66px;display:flex;align-items:center;gap:14px;padding:0 20px;
+  background:color-mix(in srgb,var(--bg) 78%,transparent);backdrop-filter:blur(18px) saturate(160%);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:11px;font-weight:900;letter-spacing:.5px;white-space:nowrap}
+.brand .logo{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;flex:0 0 auto;
+  background:linear-gradient(135deg,var(--acc),var(--acc3) 55%,var(--acc2));box-shadow:0 8px 22px -8px var(--acc)}
+.brand small{display:block;font-size:11px;font-weight:500;color:var(--tx2);letter-spacing:2px}
+.brand b{font-size:15px;display:block;line-height:1.2}
+.topbar .spacer{flex:1}
+.tbtn{height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--panel);cursor:pointer;
+  font-size:13px;font-weight:600;color:var(--tx2);display:inline-flex;align-items:center;gap:7px;transition:.25s var(--ease);white-space:nowrap}
+.tbtn:hover{color:var(--tx);border-color:color-mix(in srgb,var(--acc) 55%,transparent);transform:translateY(-2px)}
+.readpill{font-size:12px;color:var(--tx2);display:flex;align-items:center;gap:8px}
+.readpill .ring{width:26px;height:26px}
+#progressBar{position:absolute;left:0;bottom:-1px;height:2.5px;width:0;
+  background:linear-gradient(90deg,var(--acc2),var(--acc),var(--acc3));box-shadow:0 0 14px var(--acc);transition:width .18s linear}
+.burger{display:none;width:40px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--panel);cursor:pointer;place-items:center}
+.burger span{display:block;width:17px;height:2px;background:var(--tx);margin:3px auto;border-radius:2px;transition:.3s}
+
+.wrap{display:flex;align-items:flex-start;max-width:1560px;margin:0 auto;padding:66px 0 0}
+.sidebar{position:sticky;top:66px;width:var(--side);flex:0 0 var(--side);height:calc(100vh - 66px);overflow-y:auto;
+  padding:26px 16px 40px;border-right:1px solid var(--line);background:color-mix(in srgb,var(--bg2) 55%,transparent);backdrop-filter:blur(10px)}
+.navcap{font-size:11px;letter-spacing:3px;color:var(--tx3);font-weight:700;margin:18px 10px 8px}
+.navitem{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:12px;font-size:13.5px;color:var(--tx2);
+  cursor:pointer;position:relative;transition:.22s var(--ease);margin-bottom:2px}
+.navitem .dot{width:7px;height:7px;border-radius:50%;background:var(--tx3);flex:0 0 auto;transition:.25s}
+.navitem .num{font-size:10.5px;font-weight:700;color:var(--tx3);width:20px;font-family:var(--f-serif)}
+.navitem:hover{background:var(--panel);color:var(--tx)}
+.navitem.active{background:linear-gradient(90deg,color-mix(in srgb,var(--acc) 26%,transparent),transparent);color:#fff}
+html[data-theme="light"] .navitem.active{color:var(--tx)}
+.navitem.active .dot{background:var(--acc2);box-shadow:0 0 10px var(--acc2)}
+.navitem.active::before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:3px;background:linear-gradient(var(--acc2),var(--acc))}
+.navitem.done .dot{background:var(--ok);box-shadow:0 0 8px color-mix(in srgb,var(--ok) 70%,transparent)}
+main{flex:1;min-width:0;padding:0 clamp(16px,3.2vw,52px) 90px}
+
+.sec{padding:76px 0 12px;scroll-margin-top:80px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11.5px;font-weight:700;letter-spacing:3px;
+  color:var(--acc2);text-transform:uppercase;margin-bottom:14px}
+.eyebrow::before{content:"";width:26px;height:1.5px;background:var(--acc2);display:block}
+h1{font-family:var(--f-serif);font-size:clamp(32px,5.4vw,62px);line-height:1.18;font-weight:700;letter-spacing:-.5px}
+h2{font-family:var(--f-serif);font-size:clamp(24px,3.2vw,36px);line-height:1.3;font-weight:700;margin-bottom:10px}
+h3{font-size:17px;font-weight:700;margin-bottom:6px;letter-spacing:.3px}
+h4{font-size:14.5px;font-weight:700;margin-bottom:4px}
+p{color:var(--tx2);font-size:14.5px}
+.lead{font-size:16px;color:var(--tx2);max-width:74ch}
+.grad{background:linear-gradient(100deg,var(--acc2),var(--acc) 45%,var(--acc3));-webkit-background-clip:text;background-clip:text;color:transparent}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-m);padding:20px;backdrop-filter:blur(8px);transition:.3s var(--ease)}
+.card:hover{border-color:color-mix(in srgb,var(--acc) 42%,transparent);transform:translateY(-3px);box-shadow:var(--shadow)}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.row{display:flex;gap:16px;flex-wrap:wrap}
+.mt{margin-top:20px}.mt2{margin-top:32px}
+.tag{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:999px;font-size:11.5px;font-weight:700;
+  border:1px solid var(--line);background:var(--panel);color:var(--tx2)}
+.tag.a{border-color:color-mix(in srgb,var(--acc) 45%,transparent);color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent)}
+.tag.b{border-color:color-mix(in srgb,var(--acc2) 45%,transparent);color:var(--acc2);background:color-mix(in srgb,var(--acc2) 12%,transparent)}
+.tag.c{border-color:color-mix(in srgb,var(--ok) 45%,transparent);color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,transparent)}
+.tag.d{border-color:color-mix(in srgb,var(--warn) 45%,transparent);color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent)}
+.tag.e{border-color:color-mix(in srgb,var(--bad) 45%,transparent);color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,transparent)}
+.note{border-left:3px solid var(--acc2);background:color-mix(in srgb,var(--acc2) 9%,transparent);padding:12px 15px;
+  border-radius:0 12px 12px 0;font-size:13.5px;color:var(--tx2);margin-top:14px}
+.note.warn{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 10%,transparent)}
+.note.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 11%,transparent)}
+.note.tip{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 10%,transparent)}
+.note b{color:var(--tx)}
+ul.list{list-style:none;margin-top:8px}
+ul.list li{position:relative;padding-left:20px;font-size:14px;color:var(--tx2);margin-bottom:7px}
+ul.list li::before{content:"";position:absolute;left:2px;top:.68em;width:7px;height:7px;border-radius:2px;
+  background:linear-gradient(135deg,var(--acc2),var(--acc));transform:rotate(45deg)}
+ol.steps{list-style:none;counter-reset:s;margin-top:10px}
+ol.steps li{counter-increment:s;position:relative;padding-left:38px;margin-bottom:12px;font-size:14px;color:var(--tx2)}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:9px;display:grid;
+  place-items:center;font-size:12px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--acc),var(--acc3))}
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+kbd{font-family:ui-monospace,Menlo,monospace;font-size:12px;padding:2px 7px;border-radius:6px;border:1px solid var(--line);background:var(--panel2);color:var(--tx)}
+
+/* ★ 教學聲明 */
+.disclaimer{display:flex;gap:15px;align-items:flex-start;padding:18px 20px;border-radius:var(--r-m);margin-top:28px;
+  border:1px solid color-mix(in srgb,var(--acc2) 42%,transparent);position:relative;overflow:hidden;
+  background:linear-gradient(120deg,color-mix(in srgb,var(--acc2) 13%,transparent),color-mix(in srgb,var(--acc) 11%,transparent),color-mix(in srgb,var(--acc3) 9%,transparent))}
+.disclaimer::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(var(--acc2),var(--acc),var(--acc3))}
+.disclaimer .dic{width:40px;height:40px;border-radius:13px;flex:0 0 auto;display:grid;place-items:center;font-size:19px;color:#fff;
+  background:linear-gradient(135deg,var(--acc2),var(--acc));box-shadow:0 12px 26px -14px var(--acc)}
+.disclaimer h4{font-size:15px;color:var(--tx);margin-bottom:4px}
+.disclaimer p{font-size:13.5px;line-height:1.8}
+.disclaimer p b{color:var(--tx)}
+.disclaimer .sub{font-size:12px;color:var(--tx3);margin-top:7px;display:block}
+.disclaimer-mini{border:1px dashed color-mix(in srgb,var(--acc2) 45%,transparent);border-radius:12px;padding:11px 13px;
+  background:color-mix(in srgb,var(--acc2) 7%,transparent);font-size:12.5px;color:var(--tx2);margin-top:14px;line-height:1.75}
+.disclaimer-mini b{color:var(--tx)}
+
+.newrule{position:relative;border-radius:var(--r-m);padding:22px;overflow:hidden;isolation:isolate;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--warn) 15%,transparent),color-mix(in srgb,var(--bad) 13%,transparent));
+  border:1px solid color-mix(in srgb,var(--warn) 48%,transparent)}
+.newrule::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(420px 140px at 0% 0%,color-mix(in srgb,var(--warn) 22%,transparent),transparent 70%)}
+.newrule::after{content:"2026";position:absolute;right:-10px;bottom:-30px;font-family:var(--f-serif);font-weight:700;
+  font-size:118px;line-height:1;color:color-mix(in srgb,var(--warn) 13%,transparent);z-index:-1;pointer-events:none}
+.newrule h4{font-size:17px;color:var(--tx);margin:10px 0 6px}
+.newrule p{font-size:13.5px}
+.dlcount{display:flex;gap:7px;margin-top:14px;flex-wrap:wrap;align-items:center}
+.dlcount i{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;font-size:11.5px;font-weight:800;
+  border:1.5px dashed color-mix(in srgb,var(--warn) 65%,transparent);color:var(--warn);font-style:normal;transition:.3s var(--ease)}
+.dlcount i.used{background:linear-gradient(135deg,var(--warn),var(--bad));border-style:solid;color:#1a0f00;box-shadow:0 8px 18px -10px var(--bad)}
+.dlmeta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px}
+.dlleft{font-size:13px;color:var(--tx2)}
+.dlleft b{color:var(--warn);font-size:17px;font-family:var(--f-serif)}
+
+.hero{padding:60px 0 30px;position:relative;overflow:hidden}
+.hero-in{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center}
+.hero .badge{display:inline-flex;gap:9px;align-items:center;padding:7px 15px;border-radius:999px;border:1px solid var(--line);
+  background:var(--panel);font-size:12.5px;color:var(--tx2);margin-bottom:20px}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 color-mix(in srgb,var(--ok) 70%,transparent);animation:pulse 2s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 9px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.hero p.lead{margin:16px 0 26px}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 24px;border-radius:999px;border:1px solid transparent;
+  font-size:14px;font-weight:700;cursor:pointer;transition:.28s var(--ease);background:none}
+.btn.pri{background:linear-gradient(120deg,var(--acc),var(--acc3) 60%,var(--acc2));color:#fff;box-shadow:0 16px 34px -16px var(--acc)}
+.btn.pri:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 22px 44px -16px var(--acc)}
+.btn.ghost{border-color:var(--line);background:var(--panel);color:var(--tx)}
+.btn.ghost:hover{border-color:var(--acc);transform:translateY(-3px)}
+.btn.sm{padding:8px 16px;font-size:12.5px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:34px}
+.stat{border:1px solid var(--line);border-radius:var(--r-m);padding:14px 12px;background:var(--panel);text-align:center}
+.stat b{display:block;font-family:var(--f-serif);font-size:clamp(22px,2.6vw,32px);line-height:1.1;
+  background:linear-gradient(120deg,var(--acc2),var(--acc));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat span{font-size:11.5px;color:var(--tx3);letter-spacing:.6px}
+.visual{position:relative;height:340px;border-radius:var(--r-l);border:1px solid var(--line);overflow:hidden;
+  background:radial-gradient(120% 100% at 50% 120%,color-mix(in srgb,var(--acc) 26%,transparent),transparent 60%),var(--bg2)}
+.eq{position:absolute;inset:auto 0 0 0;height:60%;display:flex;align-items:flex-end;justify-content:center;gap:5px;padding:0 18px 22px}
+.eq i{flex:1;max-width:13px;border-radius:5px 5px 2px 2px;background:linear-gradient(180deg,var(--acc2),var(--acc) 60%,var(--acc3));
+  transform-origin:bottom;animation:eqb 1.15s var(--ease) infinite alternate;opacity:.9}
+@keyframes eqb{from{transform:scaleY(.14)}to{transform:scaleY(1)}}
+.disc{position:absolute;top:34px;left:50%;transform:translateX(-50%);width:132px;height:132px;border-radius:50%;
+  background:conic-gradient(from 0deg,#1b1b30,#2c2140,#1b1b30,#33254a,#1b1b30);border:1px solid var(--line);
+  animation:spin 6s linear infinite;box-shadow:0 20px 50px -20px #000}
+.disc::after{content:"";position:absolute;inset:44%;border-radius:50%;background:linear-gradient(135deg,var(--acc2),var(--acc3))}
+.disc::before{content:"";position:absolute;inset:14%;border-radius:50%;border:1px dashed rgba(255,255,255,.13)}
+@keyframes spin{to{transform:translateX(-50%) rotate(360deg)}}
+.floater{position:absolute;font-size:20px;opacity:.65;animation:fl 7s ease-in-out infinite}
+@keyframes fl{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-22px) rotate(8deg)}}
+
+.acc{border:1px solid var(--line);border-radius:var(--r-m);overflow:hidden;background:var(--panel);margin-bottom:12px}
+.acc-h{display:flex;align-items:center;gap:12px;padding:15px 18px;cursor:pointer;user-select:none;transition:.25s}
+.acc-h:hover{background:var(--panel2)}
+.acc-h .ic{width:30px;height:30px;flex:0 0 auto;border-radius:9px;display:grid;place-items:center;font-size:14px;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--acc) 30%,transparent),color-mix(in srgb,var(--acc2) 25%,transparent))}
+.acc-h h4{flex:1;font-size:14.5px;margin:0}
+.acc-h .chev{transition:.35s var(--ease);color:var(--tx3)}
+.acc.open .acc-h .chev{transform:rotate(180deg);color:var(--acc2)}
+.acc-b{max-height:0;overflow:hidden;transition:max-height .45s var(--ease)}
+.acc.open .acc-b{max-height:1800px}
+.acc-b-in{padding:0 18px 18px 60px}
+
+.tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px;overflow:hidden;border-radius:var(--r-m);border:1px solid var(--line)}
+.tbl th,.tbl td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl th{background:var(--panel2);font-size:12px;letter-spacing:1px;color:var(--tx2);font-weight:700;white-space:nowrap}
+.tbl tr:last-child td{border-bottom:none}
+.tbl td{color:var(--tx2)}
+.tbl td b{color:var(--tx)}
+.tbl tbody tr{transition:.2s}
+.tbl tbody tr:hover{background:var(--panel)}
+.tblwrap{overflow-x:auto;border-radius:var(--r-m)}
+
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.tab{padding:9px 18px;border-radius:999px;border:1px solid var(--line);background:var(--panel);cursor:pointer;
+  font-size:13px;font-weight:600;color:var(--tx2);transition:.25s var(--ease)}
+.tab:hover{color:var(--tx);transform:translateY(-2px)}
+.tab.on{background:linear-gradient(120deg,var(--acc),var(--acc3));color:#fff;border-color:transparent;box-shadow:0 12px 26px -14px var(--acc)}
+.tabpane{display:none;animation:fade .45s var(--ease)}
+.tabpane.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+.mock{border:1px solid var(--line);border-radius:var(--r-l);overflow:hidden;background:var(--bg2);box-shadow:var(--shadow)}
+.mock-top{display:flex;align-items:center;gap:8px;padding:11px 15px;border-bottom:1px solid var(--line);background:var(--panel)}
+.mock-top .dots{display:flex;gap:6px}
+.mock-top .dots i{width:11px;height:11px;border-radius:50%;display:block}
+.mock-body{display:grid;grid-template-columns:190px 1fr}
+.mock-side{border-right:1px solid var(--line);padding:14px 10px;background:color-mix(in srgb,var(--panel) 60%,transparent)}
+.mside-i{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:10px;font-size:12.5px;color:var(--tx2);cursor:default;margin-bottom:3px}
+.mside-i.on{background:linear-gradient(90deg,color-mix(in srgb,var(--acc) 30%,transparent),transparent);color:#fff;font-weight:700}
+html[data-theme="light"] .mside-i.on{color:var(--tx)}
+.mock-main{padding:18px}
+.mrow{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+.field{flex:1;min-width:210px;margin-bottom:14px}
+.field label{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;letter-spacing:.6px;color:var(--tx3);margin-bottom:7px;text-transform:uppercase}
+.field label .q{width:14px;height:14px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:9px;color:var(--tx3)}
+.inp{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:color-mix(in srgb,var(--bg) 60%,transparent);
+  font-size:13.5px;outline:none;transition:.25s;resize:vertical;color:var(--tx)}
+.inp:focus{border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 20%,transparent)}
+textarea.inp{min-height:96px;line-height:1.7}
+.count{font-size:11px;color:var(--tx3);text-align:right;margin-top:5px}
+.seg{display:flex;gap:6px;background:var(--panel);padding:5px;border-radius:12px;border:1px solid var(--line);width:fit-content}
+.seg button{padding:7px 15px;border-radius:8px;border:none;background:none;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--tx2);transition:.25s}
+.seg button.on{background:linear-gradient(120deg,var(--acc),var(--acc3));color:#fff}
+.switch{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;font-size:13px;color:var(--tx2)}
+.switch input{display:none}
+.track{width:44px;height:24px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);position:relative;transition:.3s}
+.track::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--tx3);transition:.3s var(--ease)}
+.switch input:checked + .track{background:linear-gradient(120deg,var(--acc2),var(--acc));border-color:transparent}
+.switch input:checked + .track::after{left:22px;background:#fff}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.chip{padding:5px 12px;border-radius:999px;border:1px dashed var(--line);font-size:11.5px;color:var(--tx2);cursor:pointer;transition:.22s;background:none}
+.chip:hover{border-style:solid;border-color:var(--acc2);color:var(--acc2);transform:translateY(-2px)}
+.mock-foot{display:flex;align-items:center;gap:12px;padding:14px 18px;border-top:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+.credit{margin-left:auto;font-size:12.5px;color:var(--tx2);display:flex;align-items:center;gap:7px}
+.btn-create{padding:11px 30px;border-radius:12px;border:none;cursor:pointer;font-weight:800;font-size:14px;color:#fff;
+  background:linear-gradient(120deg,var(--acc),var(--acc3) 55%,var(--acc2));background-size:200% 100%;
+  box-shadow:0 14px 30px -14px var(--acc);transition:.3s var(--ease)}
+.btn-create:hover{background-position:100% 0;transform:translateY(-2px)}
+.btn-create:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.result{margin-top:18px;display:grid;gap:12px}
+.song{display:flex;gap:14px;align-items:center;border:1px solid var(--line);border-radius:var(--r-m);padding:13px;background:var(--panel);animation:pop .5s var(--ease) both}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+.song .cover{width:62px;height:62px;border-radius:12px;flex:0 0 auto;display:grid;place-items:center;background:linear-gradient(135deg,var(--acc),var(--acc2))}
+.song .cover b{font-family:var(--f-serif);font-size:20px;color:#fff}
+.playb{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--panel2);cursor:pointer;display:grid;place-items:center;transition:.25s;flex:0 0 auto}
+.playb:hover{border-color:var(--acc);transform:scale(1.08)}
+.wave{display:flex;align-items:center;gap:2.5px;height:28px}
+.wave i{width:2.5px;border-radius:2px;background:var(--tx3);height:20%;transition:height .2s}
+.song.playing .wave i{background:linear-gradient(var(--acc2),var(--acc));animation:wv .8s ease-in-out infinite alternate}
+@keyframes wv{from{height:18%}to{height:100%}}
+.loading{display:flex;gap:6px;align-items:center;padding:18px;justify-content:center;color:var(--tx2);font-size:13.5px}
+.loading i{width:8px;height:8px;border-radius:50%;background:var(--acc);animation:ld 1s infinite}
+.loading i:nth-child(2){animation-delay:.15s}.loading i:nth-child(3){animation-delay:.3s}
+@keyframes ld{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(-7px)}}
+
+.lab{display:grid;grid-template-columns:.95fr 1.05fr;gap:20px}
+.optgroup{margin-bottom:16px}
+.optgroup > label{font-size:11.5px;font-weight:700;letter-spacing:1px;color:var(--tx3);display:block;margin-bottom:8px;text-transform:uppercase}
+.pills{display:flex;gap:7px;flex-wrap:wrap}
+.pill{padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--panel);cursor:pointer;font-size:12.5px;color:var(--tx2);transition:.22s var(--ease)}
+.pill:hover{transform:translateY(-2px);color:var(--tx);border-color:color-mix(in srgb,var(--acc) 50%,transparent)}
+.pill.on{background:linear-gradient(120deg,var(--acc2),var(--acc));color:#fff;border-color:transparent;font-weight:700;box-shadow:0 10px 22px -12px var(--acc2)}
+.outbox{border:1px solid var(--line);border-radius:var(--r-m);background:color-mix(in srgb,var(--bg) 55%,transparent);padding:16px;position:relative}
+.outbox pre{white-space:pre-wrap;word-break:break-word;font-family:var(--f-sans);font-size:14px;line-height:1.85;color:var(--tx)}
+.copybtn{position:absolute;top:11px;right:11px;padding:6px 13px;border-radius:9px;border:1px solid var(--line);background:var(--panel);cursor:pointer;font-size:11.5px;font-weight:700;color:var(--tx2);transition:.25s}
+.copybtn:hover{color:#fff;background:var(--acc);border-color:transparent}
+.copybtn.done{background:var(--ok);border-color:transparent;color:#fff}
+
+.structbar{display:flex;gap:3px;height:78px;align-items:stretch;margin-top:14px}
+.segblock{flex:1;border-radius:9px;cursor:pointer;position:relative;display:flex;align-items:flex-end;justify-content:center;padding-bottom:7px;
+  font-size:10.5px;font-weight:700;color:#fff;overflow:hidden;transition:.3s var(--ease);border:1px solid transparent;min-width:0}
+.segblock span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px;text-shadow:0 1px 4px rgba(0,0,0,.5)}
+.segblock:hover{transform:translateY(-4px)}
+.segblock.on{border-color:#fff;transform:translateY(-6px);box-shadow:0 14px 26px -12px rgba(0,0,0,.7)}
+.segblock.play{animation:segp .6s var(--ease)}
+@keyframes segp{50%{filter:brightness(1.65);transform:translateY(-9px) scaleY(1.04)}}
+.structinfo{margin-top:16px;border:1px solid var(--line);border-radius:var(--r-m);padding:18px;background:var(--panel);min-height:118px}
+
+.chat{display:flex;flex-direction:column;gap:14px;max-width:840px}
+.msg{display:flex;gap:11px;max-width:88%;animation:fade .5s var(--ease)}
+.msg .av{width:34px;height:34px;border-radius:11px;flex:0 0 auto;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff}
+.msg.user{align-self:flex-end;flex-direction:row-reverse}
+.msg .av.u{background:linear-gradient(135deg,var(--acc2),var(--acc))}
+.msg .av.ai{background:linear-gradient(135deg,#10a37f,#0e7490)}
+.bub{padding:13px 16px;border-radius:16px;font-size:13.5px;line-height:1.8;border:1px solid var(--line);background:var(--panel);color:var(--tx2)}
+.msg.user .bub{background:linear-gradient(135deg,color-mix(in srgb,var(--acc) 24%,transparent),color-mix(in srgb,var(--acc3) 18%,transparent));color:var(--tx);border-color:color-mix(in srgb,var(--acc) 30%,transparent)}
+.bub b{color:var(--tx)}
+.lyric{font-family:var(--f-serif);white-space:pre-wrap;font-size:14px;line-height:2;color:var(--tx)}
+.lyric .sec-t{color:var(--acc2);font-family:var(--f-sans);font-size:11.5px;font-weight:800;letter-spacing:2px;display:block;margin:10px 0 2px}
+
+.shots{display:grid;gap:14px}
+.shot{border:1px solid var(--line);border-radius:var(--r-m);overflow:hidden;background:var(--panel);transition:.3s var(--ease)}
+.shot:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--acc) 40%,transparent);box-shadow:var(--shadow)}
+.shot-h{display:flex;gap:14px;align-items:center;padding:14px 16px;cursor:pointer}
+.shot-no{width:44px;height:44px;border-radius:13px;flex:0 0 auto;display:grid;place-items:center;font-family:var(--f-serif);font-size:19px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--acc),var(--acc3))}
+.shot-h h4{flex:1;margin:0;font-size:15px}
+.shot-time{font-size:11.5px;font-family:ui-monospace,monospace;color:var(--acc2);border:1px solid var(--line);padding:3px 9px;border-radius:8px;background:var(--bg2)}
+.shot-b{max-height:0;overflow:hidden;transition:max-height .5s var(--ease)}
+.shot.open .shot-b{max-height:640px}
+.shot-b-in{padding:0 16px 16px 74px;display:grid;gap:10px}
+.kv{display:flex;gap:10px;font-size:13.5px}
+.kv b{flex:0 0 74px;color:var(--acc2);font-size:12px;letter-spacing:1px;padding-top:2px}
+.kv p{color:var(--tx2);font-size:13.5px}
+.timeline{display:flex;height:8px;border-radius:99px;overflow:hidden;margin-top:8px;background:var(--panel2)}
+.timeline i{display:block;height:100%;transition:.4s}
+
+.editor{border:1px solid var(--line);border-radius:var(--r-l);overflow:hidden;background:var(--bg2);box-shadow:var(--shadow)}
+.ed-top{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+.ed-logo{font-family:var(--f-serif);font-weight:700;font-size:15px;background:linear-gradient(120deg,var(--acc2),var(--acc));-webkit-background-clip:text;background-clip:text;color:transparent}
+.ed-name{padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg2);font-size:12px;width:140px;outline:none}
+.ed-name:focus{border-color:var(--acc)}
+.ed-iconbtn{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:none;cursor:pointer;color:var(--tx2);display:grid;place-items:center;transition:.22s}
+.ed-iconbtn:hover{color:var(--tx);border-color:var(--acc)}
+.ed-export{margin-left:auto;padding:7px 18px;border-radius:9px;border:none;background:linear-gradient(120deg,var(--acc2),var(--acc));color:#fff;font-weight:700;font-size:12.5px;cursor:pointer;transition:.25s}
+.ed-export:hover{transform:translateY(-2px);box-shadow:0 12px 24px -12px var(--acc)}
+.ed-mid{display:grid;grid-template-columns:58px 214px 1fr;position:relative}
+.ed-rail{border-right:1px solid var(--line);padding:8px 6px;display:grid;gap:5px;justify-items:center;background:color-mix(in srgb,var(--panel) 50%,transparent)}
+.rail-b{width:46px;padding:6px 2px;border-radius:11px;border:1px solid transparent;background:none;cursor:pointer;display:grid;place-items:center;
+  font-size:16px;color:var(--tx2);transition:.22s var(--ease);gap:1px}
+.rail-b small{font-size:8.5px;letter-spacing:.3px}
+.rail-b:hover{background:var(--panel);color:var(--tx)}
+.rail-b.on{background:linear-gradient(135deg,var(--acc),var(--acc3));color:#fff}
+.ed-media{border-right:1px solid var(--line);padding:11px;overflow-y:auto;max-height:290px}
+.ed-media h5{font-size:11px;letter-spacing:1.5px;color:var(--tx3);margin-bottom:9px;text-transform:uppercase}
+.med-i{display:flex;gap:9px;align-items:center;padding:7px 8px;border-radius:10px;border:1px dashed var(--line);margin-bottom:6px;
+  cursor:pointer;font-size:12px;color:var(--tx2);transition:.22s var(--ease);background:none;width:100%;text-align:left}
+.med-i:hover{border-style:solid;border-color:var(--acc2);color:var(--acc2);transform:translateX(3px)}
+.med-i .th{width:36px;height:26px;border-radius:6px;flex:0 0 auto;display:grid;place-items:center;font-size:13px;color:#fff}
+.med-i b{display:block;font-size:12px;color:var(--tx);font-weight:600}
+.med-i span{font-size:10.5px;color:var(--tx3)}
+.ed-preview{padding:13px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.ed-stage{position:relative;flex:1;min-height:186px;border-radius:12px;border:1px solid var(--line);overflow:hidden;background:#0b0b16;transition:background .5s}
+.ed-scene{position:absolute;inset:0;display:grid;place-items:center;font-size:52px;filter:drop-shadow(0 8px 18px rgba(0,0,0,.6))}
+.ed-sceneN{position:absolute;top:10px;left:12px;font-size:11px;color:rgba(255,255,255,.75);letter-spacing:1px;text-shadow:0 1px 4px #000}
+.ed-sub{position:absolute;left:6%;right:6%;bottom:14px;text-align:center;color:#fff;font-size:14px;font-weight:700;
+  text-shadow:0 2px 8px #000;padding:5px 10px;border-radius:8px;background:rgba(0,0,0,.28);transition:.3s}
+.ed-sub.hit{background:rgba(251,146,60,.85);color:#fff}
+.hot{position:absolute;width:23px;height:23px;border-radius:50%;background:var(--warn);color:#1a1200;font-size:11px;font-weight:800;
+  display:grid;place-items:center;cursor:pointer;z-index:7;animation:hp 2.6s infinite;border:none}
+@keyframes hp{0%{box-shadow:0 0 0 0 rgba(251,191,36,.55)}70%{box-shadow:0 0 0 11px rgba(251,191,36,0)}100%{box-shadow:0 0 0 0 rgba(251,191,36,0)}}
+.hl{outline:2px dashed var(--warn);outline-offset:3px;border-radius:10px}
+.ed-ctrl{display:flex;gap:9px;align-items:center;justify-content:center;flex-wrap:wrap}
+.ctl{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--panel);cursor:pointer;display:grid;place-items:center;color:var(--tx2);transition:.22s}
+.ctl:hover{color:var(--tx);border-color:var(--acc)}
+.ctl.main{width:40px;height:40px;background:linear-gradient(135deg,var(--acc2),var(--acc));color:#fff;border-color:transparent}
+.ed-time{font-family:ui-monospace,monospace;font-size:12px;color:var(--tx2)}
+.ed-tl{border-top:1px solid var(--line);padding:10px 14px 14px;background:color-mix(in srgb,var(--panel) 55%,transparent)}
+.ed-ruler{position:relative;height:18px;margin-left:64px;border-bottom:1px solid var(--line)}
+.ed-ruler i{position:absolute;top:0;bottom:0;border-left:1px solid var(--line);padding-left:3px;font-style:normal;font-size:8.5px;color:var(--tx3)}
+.ed-head{position:absolute;top:-4px;bottom:-1000px;width:2px;background:var(--bad);z-index:6;pointer-events:none}
+.ed-head::before{content:"";position:absolute;top:0;left:-4px;border:5px solid transparent;border-top-color:var(--bad)}
+.ed-track{display:flex;align-items:center;gap:8px;margin-top:7px}
+.ed-tlab{width:56px;flex:0 0 auto;font-size:10px;color:var(--tx3);text-align:right;letter-spacing:.4px}
+.ed-track.top .ed-tlab{color:var(--warn);font-weight:700}
+.ed-trow{flex:1;height:32px;border-radius:8px;background:var(--panel2);position:relative;overflow:hidden;min-width:0}
+.ed-track.top .ed-trow{background:color-mix(in srgb,var(--warn) 9%,var(--panel2))}
+.tclip{position:absolute;top:3px;bottom:3px;border-radius:6px;display:flex;align-items:center;padding:0 6px;font-size:9.5px;
+  color:#fff;font-weight:700;cursor:pointer;overflow:hidden;white-space:nowrap;transition:filter .2s,box-shadow .2s}
+.tclip:hover{filter:brightness(1.16)}
+.tclip.sel{box-shadow:0 0 0 2px #fff inset,0 6px 16px -6px rgba(0,0,0,.8);filter:brightness(1.2)}
+.tclip.play-now{filter:brightness(1.35)}
+.tclip .rsz{position:absolute;right:0;top:0;bottom:0;width:9px;cursor:ew-resize;background:rgba(255,255,255,.28)}
+.tclip .rsz::after{content:"";position:absolute;right:3px;top:25%;bottom:25%;width:2px;background:rgba(255,255,255,.85);border-radius:2px}
+.ed-empty{position:absolute;inset:0;display:grid;place-items:center;font-size:10.5px;color:var(--tx3)}
+.ed-foot{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:11px 14px;border-top:1px solid var(--line);background:var(--panel)}
+.mini{padding:6px 12px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);cursor:pointer;font-size:11.5px;color:var(--tx2);transition:.22s}
+.mini:hover{color:var(--tx);border-color:var(--acc)}
+.mini:disabled{opacity:.4;cursor:not-allowed}
+.alignbar{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:11.5px;color:var(--tx2)}
+.hslist{display:grid;gap:8px}
+.hsrow{display:flex;gap:11px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);cursor:pointer;transition:.25s var(--ease)}
+.hsrow:hover,.hsrow.on{border-color:var(--warn);transform:translateX(4px)}
+.hsrow b{width:22px;height:22px;flex:0 0 auto;border-radius:50%;background:var(--warn);color:#1a1200;display:grid;place-items:center;font-size:11px}
+.hsrow p{font-size:12.5px;margin-top:2px}
+.hsrow h4{font-size:13.5px}
+
+.stepper{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;margin-bottom:18px;scrollbar-width:thin}
+.stp{flex:1;min-width:96px;padding:10px 8px;border-radius:12px;border:1px solid var(--line);background:var(--panel);cursor:pointer;text-align:center;transition:.25s var(--ease)}
+.stp:hover{transform:translateY(-3px)}
+.stp.on{border-color:transparent;background:linear-gradient(135deg,var(--acc),var(--acc3));color:#fff}
+.stp b{display:block;font-family:var(--f-serif);font-size:16px;line-height:1}
+.stp span{font-size:11px;opacity:.85;display:block;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stepbody{border:1px solid var(--line);border-radius:var(--r-m);padding:22px;background:var(--panel);min-height:230px}
+.stepnav{display:flex;gap:10px;margin-top:16px;align-items:center}
+.stepnav .sp{flex:1;font-size:12.5px;color:var(--tx3)}
+
+.quiz-head{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:20px}
+.qbar{flex:1;min-width:200px;height:9px;border-radius:99px;background:var(--panel2);overflow:hidden}
+.qbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--acc2),var(--acc),var(--acc3));transition:.5s var(--ease)}
+.qcard{border:1px solid var(--line);border-radius:var(--r-m);padding:22px;background:var(--panel);margin-bottom:14px;transition:.3s}
+.qcard.answered.ok{border-color:color-mix(in srgb,var(--ok) 50%,transparent)}
+.qcard.answered.no{border-color:color-mix(in srgb,var(--bad) 50%,transparent)}
+.qtitle{display:flex;gap:11px;font-size:15px;font-weight:700;margin-bottom:14px}
+.qtitle .qn{flex:0 0 auto;width:28px;height:28px;border-radius:9px;display:grid;place-items:center;font-size:12px;background:linear-gradient(135deg,var(--acc),var(--acc3));color:#fff;font-weight:800}
+.opts{display:grid;gap:9px}
+.opt{display:flex;gap:11px;align-items:flex-start;padding:12px 15px;border-radius:12px;border:1px solid var(--line);
+  background:color-mix(in srgb,var(--bg) 40%,transparent);cursor:pointer;transition:.22s var(--ease);font-size:14px;color:var(--tx2)}
+.opt:hover:not(.locked){transform:translateX(4px);border-color:color-mix(in srgb,var(--acc) 50%,transparent);color:var(--tx)}
+.opt .k{width:22px;height:22px;border-radius:7px;border:1px solid var(--line);display:grid;place-items:center;font-size:11px;font-weight:700;flex:0 0 auto;margin-top:1px}
+.opt.right{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--tx)}
+.opt.right .k{background:var(--ok);border-color:transparent;color:#fff}
+.opt.wrong{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 13%,transparent);color:var(--tx)}
+.opt.wrong .k{background:var(--bad);border-color:transparent;color:#fff}
+.opt.locked{cursor:default}
+.exp{margin-top:12px;padding:12px 15px;border-radius:12px;font-size:13.5px;display:none;background:color-mix(in srgb,var(--acc2) 10%,transparent);border-left:3px solid var(--acc2);color:var(--tx2)}
+.exp.show{display:block;animation:fade .4s var(--ease)}
+.exp b{color:var(--acc2)}
+.scorebox{text-align:center;padding:34px 20px;border:1px solid var(--line);border-radius:var(--r-l);background:var(--panel);display:none}
+.scorebox.show{display:block;animation:pop .6s var(--ease)}
+.scorebox .big{font-family:var(--f-serif);font-size:66px;line-height:1;font-weight:700}
+
+.task{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-radius:13px;background:var(--panel);cursor:pointer;transition:.25s var(--ease);margin-bottom:9px}
+.task:hover{transform:translateX(4px);border-color:color-mix(in srgb,var(--acc) 45%,transparent)}
+.task .box{width:22px;height:22px;border-radius:7px;border:2px solid var(--tx3);flex:0 0 auto;margin-top:2px;display:grid;place-items:center;transition:.25s}
+.task.on .box{background:linear-gradient(135deg,var(--ok),#0ea5e9);border-color:transparent}
+.task.on .box svg{opacity:1}
+.task .box svg{opacity:0;transition:.25s}
+.task.on span{color:var(--tx3);text-decoration:line-through}
+.task span{font-size:14px;color:var(--tx2)}
+.donut{width:120px;height:120px}
+
+.linkcard{display:flex;gap:14px;align-items:center;padding:15px;border:1px solid var(--line);border-radius:var(--r-m);background:var(--panel);transition:.28s var(--ease)}
+.linkcard:hover{transform:translateY(-4px);border-color:var(--acc);box-shadow:var(--shadow)}
+.linkcard .ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;flex:0 0 auto;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--acc) 32%,transparent),color-mix(in srgb,var(--acc2) 26%,transparent))}
+.linkcard h4{margin:0;font-size:14px}
+.linkcard p{font-size:12px;margin:0}
+.foot{border-top:1px solid var(--line);margin-top:60px;padding:34px 0 10px;text-align:center;color:var(--tx3);font-size:12.5px}
+.foot .fdis{display:inline-block;margin-bottom:14px;padding:9px 18px;border-radius:999px;font-size:12.5px;font-weight:700;
+  color:var(--tx);border:1px solid color-mix(in srgb,var(--acc2) 45%,transparent);
+  background:linear-gradient(120deg,color-mix(in srgb,var(--acc2) 14%,transparent),color-mix(in srgb,var(--acc) 12%,transparent))}
+#toTop{position:fixed;right:20px;bottom:22px;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--panel);
+  backdrop-filter:blur(10px);cursor:pointer;display:grid;place-items:center;z-index:80;opacity:0;pointer-events:none;transition:.3s var(--ease);color:var(--tx)}
+#toTop.show{opacity:1;pointer-events:auto}
+#toTop:hover{transform:translateY(-4px);border-color:var(--acc);color:var(--acc)}
+.toast{position:fixed;left:50%;bottom:30px;transform:translate(-50%,90px);z-index:200;padding:12px 22px;border-radius:999px;
+  background:linear-gradient(120deg,var(--acc),var(--acc3));color:#fff;font-size:13.5px;font-weight:700;box-shadow:0 18px 40px -14px var(--acc);
+  opacity:0;transition:.4s var(--ease);pointer-events:none;max-width:88vw;text-align:center}
+.toast.show{transform:translate(-50%,0);opacity:1}
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);margin:26px 0}
+hr.s{border:none;height:1px;background:var(--line);margin:22px 0}
+
+@media(max-width:1180px){
+  .hero-in{grid-template-columns:1fr}
+  .visual{height:250px;order:-1}
+  .lab{grid-template-columns:1fr}
+  .g4{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:980px){
+  .burger{display:grid}
+  .sidebar{position:fixed;left:0;top:66px;bottom:0;height:auto;z-index:85;transform:translateX(-104%);transition:transform .38s var(--ease);
+    width:min(84vw,300px);background:var(--bg2);box-shadow:var(--shadow)}
+  .sidebar.open{transform:none}
+  .g3{grid-template-columns:repeat(2,1fr)}
+  .mock-body{grid-template-columns:1fr}
+  .mock-side{display:flex;gap:6px;overflow-x:auto;border-right:none;border-bottom:1px solid var(--line)}
+  .mside-i{white-space:nowrap;margin:0}
+  .ed-mid{grid-template-columns:52px 1fr}
+  .ed-media{display:none}
+  .ed-media.mobile-show{display:block;position:absolute;left:52px;top:0;bottom:0;width:210px;z-index:9;background:var(--bg2);border-right:1px solid var(--line)}
+}
+@media(max-width:680px){
+  .g2,.g3,.g4,.stats{grid-template-columns:1fr 1fr}
+  main{padding:0 14px 70px}
+  .sec{padding:52px 0 8px}
+  .acc-b-in,.shot-b-in{padding-left:18px}
+  .brand small{display:none}
+  .readpill{display:none}
+  .structbar{height:120px;flex-wrap:wrap}
+  .segblock{min-width:calc(33% - 3px);flex:0 0 calc(33% - 3px)}
+  .newrule::after{font-size:76px}
+  .ed-tlab{width:38px;font-size:9px}
+  .ed-ruler{margin-left:46px}
+  .disclaimer{flex-direction:column;gap:10px}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <button class="burger" id="burger" aria-label="開啟選單"><span></span><span></span><span></span></button>
+  <a class="brand" href="#home">
+    <span class="logo">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 18V5l11-2v13" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="18" r="3" fill="#fff"/><circle cx="17" cy="16" r="3" fill="#fff"/></svg>
+    </span>
+    <span><small>AI COURSE LAB</small><b>生成式 AI 創作工作坊</b></span>
+  </a>
+  <div class="spacer"></div>
+  <div class="readpill" title="章節閱讀進度">
+    <svg class="ring" viewBox="0 0 36 36">
+      <circle cx="18" cy="18" r="15.5" fill="none" stroke="var(--line)" stroke-width="3"/>
+      <circle id="ringArc" cx="18" cy="18" r="15.5" fill="none" stroke="url(#g1)" stroke-width="3"
+              stroke-linecap="round" stroke-dasharray="97.4" stroke-dashoffset="97.4"
+              transform="rotate(-90 18 18)" style="transition:stroke-dashoffset .6s"/>
+      <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="var(--acc2)"/><stop offset="1" stop-color="var(--acc3)"/></linearGradient></defs>
+    </svg>
+    <span id="readTxt">0 / 13 章節</span>
+  </div>
+  <button class="tbtn" id="themeBtn">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    <span id="themeTxt">淺色</span>
+  </button>
+  <div id="progressBar"></div>
+</header>
+
+<div class="wrap">
+  <nav class="sidebar" id="sidebar">
+    <div class="navcap">課程地圖</div>
+    <a class="navitem" data-target="home"><i class="dot"></i><span class="num">00</span>課程總覽</a>
+    <div class="navcap">第一單元 · AI 歌曲</div>
+    <a class="navitem" data-target="suno"><i class="dot"></i><span class="num">01</span>Suno AI 認識與計費</a>
+    <a class="navitem" data-target="modes"><i class="dot"></i><span class="num">02</span>介面模擬器與兩種模式</a>
+    <a class="navitem" data-target="lab"><i class="dot"></i><span class="num">03</span>Prompt 實驗室</a>
+    <a class="navitem" data-target="structure"><i class="dot"></i><span class="num">04</span>流行歌曲結構</a>
+    <a class="navitem" data-target="gpt"><i class="dot"></i><span class="num">05</span>ChatGPT 協作寫歌</a>
+    <div class="navcap">第二單元 · AI 影片</div>
+    <a class="navitem" data-target="script"><i class="dot"></i><span class="num">06</span>腳本撰寫與分鏡</a>
+    <a class="navitem" data-target="assets"><i class="dot"></i><span class="num">07</span>素材蒐集與飲食文學</a>
+    <a class="navitem" data-target="editor"><i class="dot"></i><span class="num">08</span>剪映介面與時間軸</a>
+    <a class="navitem" data-target="capcut"><i class="dot"></i><span class="num">09</span>剪映剪輯八步驟</a>
+    <div class="navcap">學習評量</div>
+    <a class="navitem" data-target="quiz"><i class="dot"></i><span class="num">10</span>互動測驗</a>
+    <a class="navitem" data-target="task"><i class="dot"></i><span class="num">11</span>實作任務清單</a>
+    <a class="navitem" data-target="res"><i class="dot"></i><span class="num">12</span>資源連結</a>
+    <div class="divider"></div>
+    <div style="padding:0 10px">
+      <div class="tag b" style="width:100%;justify-content:center">教材來源：AI 課程初探 兩份簡報</div>
+      <div class="disclaimer-mini">📌 <b>本網頁內容為理論基礎，實際操作請以教師課堂授課狀況為主。</b></div>
+    </div>
+  </nav>
+
+  <main>
+
+  <!-- ===== 00 HERO ===== -->
+  <section class="sec hero" id="home" data-nav>
+    <div class="hero-in">
+      <div>
+        <span class="badge"><i class="pulse"></i> 互動式課程 ・ 共 2 大單元 ・ 12 個學習站</span>
+        <h1>用 AI 做一首歌，<br><span class="grad">再把它剪成一部片。</span></h1>
+        <p class="lead">本網頁整合《AI課程初探：生成式 AI 歌曲教學》與《AI課程初探：生成式 AI 影片剪輯》兩份教材，
+        把 Suno AI 作曲、ChatGPT 寫詞、腳本分鏡、剪映介面與時間軸操作到匯出成品，做成可點、可試、可測驗的互動學習旅程。</p>
+        <div class="hero-cta">
+          <button class="btn pri" data-go="suno">
+            開始學習
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+          <button class="btn ghost" data-go="editor">🎞️ 玩看看剪映時間軸</button>
+          <button class="btn ghost" data-go="quiz">📝 先做測驗</button>
+        </div>
+        <div class="stats">
+          <div class="stat"><b data-count="50">0</b><span>每日免費 Credits</span></div>
+          <div class="stat"><b data-count="7">0</b><span>免費版終生可下載 MP3 次數</span></div>
+          <div class="stat"><b data-count="3">0</b><span>時間軸軌道數</span></div>
+          <div class="stat"><b data-count="8">0</b><span>剪映流程步驟</span></div>
+        </div>
+      </div>
+      <div class="visual">
+        <div class="disc"></div>
+        <span class="floater" style="top:26px;left:14%">♪</span>
+        <span class="floater" style="top:64px;right:16%;animation-delay:1.2s">♫</span>
+        <span class="floater" style="top:130px;left:22%;animation-delay:2.1s">♬</span>
+        <span class="floater" style="top:110px;right:24%;animation-delay:.6s">🎬</span>
+        <div class="eq" id="heroEq"></div>
+      </div>
+    </div>
+
+    <!-- ★ 教學聲明（新增） -->
+    <div class="disclaimer reveal">
+      <span class="dic">📌</span>
+      <div>
+        <h4>教學說明</h4>
+        <p><b>本網頁內容為理論基礎，實際操作請以教師課堂授課狀況為主。</b></p>
+        <span class="sub">頁面中的 Suno AI 與剪映介面皆為教學用途之模擬示意，實際按鈕位置、功能名稱、版本與額度規範，
+        可能因官方更新或課堂進度而有所不同；若與教師當堂示範不一致，請一律以教師課堂授課內容為準。</span>
+      </div>
+    </div>
+
+    <div class="grid g2 mt2">
+      <div class="card reveal">
+        <span class="tag a">第一單元</span>
+        <h3 class="mt" style="margin-top:12px">🎵 生成式 AI 歌曲教學</h3>
+        <p>以 <b>Suno AI</b> 為工具：認識 Prompt 模式與 Custom 自訂模式、音樂生成六要素、免費額度計算、
+        流行歌曲結構，並用 <b>ChatGPT</b> 協作產出風格建議與完整歌詞，最後複製貼上生成歌曲並下載存檔。</p>
+        <div class="chips">
+          <span class="chip">Suno AI</span><span class="chip">Prompt / Custom</span><span class="chip">Instrumental</span>
+          <span class="chip">Style of Music</span><span class="chip">ChatGPT 寫詞</span><span class="chip">歌曲結構</span>
+        </div>
+      </div>
+      <div class="card reveal">
+        <span class="tag b">第二單元</span>
+        <h3 class="mt" style="margin-top:12px">🎬 生成式 AI 影片剪輯</h3>
+        <p>從影片製作與後製流程、<b>如何講故事寫腳本</b>（除夕之夜四段分鏡範例）、素材蒐集四大類、
+        「飲食文學」影片製作方向，到 <b>剪映 / CapCut 介面與時間軸</b>、八步驟剪輯、自動歌詞字幕校正與匯出成品。</p>
+        <div class="chips">
+          <span class="chip">分鏡腳本</span><span class="chip">素材蒐集</span><span class="chip">飲食文學</span>
+          <span class="chip">剪映介面</span><span class="chip">字幕軌在最上</span><span class="chip">Auto lyrics</span><span class="chip">Export</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note tip mt"><b>學習目標：</b>① 能說出 Suno AI 兩種模式的差異並完成一首歌；② 能運用六要素寫出精確的音樂描述 Prompt；
+    ③ 能與 ChatGPT 協作產出風格與歌詞；④ 能撰寫含秒數與配樂的分鏡腳本；⑤ 能認出剪映介面分區，並在時間軸上完成素材排列、影音對齊、字幕校正與匯出。</div>
+  </section>
+
+  <!-- ===== 01 SUNO ===== -->
+  <section class="sec" id="suno" data-nav>
+    <div class="eyebrow">Unit 1 · Station 01</div>
+    <h2>認識 <span class="grad">Suno AI</span>：人人都能上手的 AI 音樂生成器</h2>
+    <p class="lead">Suno AI 結合人工智慧與音樂創作，把「做音樂」變成一套人人都能操作的技能。</p>
+
+    <div class="grid g3 mt2">
+      <div class="card reveal">
+        <div style="font-size:26px">🤖</div>
+        <h3 class="mt">AI 音樂生成器</h3>
+        <p>結合人工智慧與音樂創作，讓做音樂這件事，變成<b style="color:var(--tx)">人人都可以上手的技能</b>。</p>
+      </div>
+      <div class="card reveal">
+        <div style="font-size:26px">🎚️</div>
+        <h3 class="mt">描述即可決定細節</h3>
+        <p>只要在網站輸入想要的<b style="color:var(--tx)">描述、情緒、節奏、風格、樂器細節</b>，全部都能自己決定。</p>
+      </div>
+      <div class="card reveal">
+        <div style="font-size:26px">✍️</div>
+        <h3 class="mt">AI 音樂＋AI 歌詞一次入手</h3>
+        <p>甚至只輸入<b style="color:var(--tx)">部分歌詞關鍵字或情境描述</b>，就能生成完整歌詞。</p>
+      </div>
+    </div>
+
+    <h3 class="mt2">🧬 AI 音樂創作過程：六大輸入要素</h3>
+    <p>點擊下方任一要素卡片，查看它的定義與範例寫法。</p>
+    <div class="grid g3 mt" id="sixElems"></div>
+
+    <hr class="s mt2">
+
+    <h3>💰 Suno AI 要付費嗎？額度計算機</h3>
+
+    <div class="newrule mt reveal">
+      <span class="tag e">🆕 2026 年新規定</span>
+      <h4>免費版帳號「終生」只能下載 <span class="grad" style="font-family:var(--f-serif)">7</span> 次歌曲的 MP3</h4>
+      <p>自 2026 年起，Suno AI 免費版除了原本的每日 50 credits 之外，<b style="color:var(--tx)">另新增「下載次數」的終生上限</b>：
+      每個免費帳號<b style="color:var(--warn)">一輩子總共只能下載 7 次歌曲的 MP3 檔案</b>。
+      次數用完後，即使每天仍有 50 credits 可以生成、可以在網站上聆聽，
+      <b style="color:var(--tx)">也無法再把歌曲下載成 MP3 存檔</b>，必須升級 Pro / Premier 付費方案才能繼續下載。</p>
+
+      <div class="dlcount" id="dlSlots"></div>
+      <div class="dlmeta">
+        <span class="dlleft">終生下載額度：已用 <b id="dlUsed">0</b> / 7 ・ 剩餘 <b id="dlLeft">7</b> 次</span>
+        <button class="btn ghost sm" id="dlUse">⬇ 模擬下載一次 MP3</button>
+        <button class="btn ghost sm" id="dlReset">重設額度</button>
+      </div>
+
+      <div class="note bad" style="margin-top:16px">
+        <b>課堂提醒：</b>因為只有 7 次機會，<b>請先在網站上把兩個版本都聽完、確定要哪一首之後再按下載</b>，
+        不要每生成就下載一次。課堂作業（一首歌 ＋ 一支影片配樂）建議至少保留 2～3 次額度備用。
+      </div>
+      <div class="note tip">
+        <b>小撇步：</b>「聆聽／生成」與「下載」是<b>兩套獨立額度</b>——生成看每日 credits（50/天），下載看終生次數（7 次）。
+        所以你可以每天生成、反覆比較，只把最終選定的那一首下載下來。
+      </div>
+      <div class="disclaimer-mini">📌 上述額度為<b>理論基礎整理</b>，實際規範與課堂操作方式，請以教師課堂授課狀況與 Suno AI 官方公告為主。</div>
+    </div>
+
+    <div class="grid g2 mt2">
+      <div class="card">
+        <ul class="list">
+          <li>Suno AI 是<b style="color:var(--tx)">有限制的免費</b> AI 寫歌工具：一天 <b style="color:var(--acc2)">50 credits</b>，一首歌 <b style="color:var(--acc2)">5 credits</b>。</li>
+          <li>系統預設<b style="color:var(--tx)">每次生成兩首歌</b>，所以每天都有 <b style="color:var(--acc2)">5 次</b>生成次數。</li>
+          <li><b style="color:var(--warn)">2026 年新規定：免費版帳號終生只能下載 7 次歌曲的 MP3。</b></li>
+          <li>可付費升級 <b style="color:var(--tx)">Pro Plan</b> 及 <b style="color:var(--tx)">Premier Plan</b>。</li>
+          <li><b style="color:var(--ok)">付費方案生成的歌曲可拿來商用！</b>免費版僅供個人使用。</li>
+        </ul>
+        <div class="note warn">⚠️ 若作品要放在公開平台營利、或作為商業案件配樂，記得使用付費方案生成，避免版權爭議。</div>
+      </div>
+      <div class="card">
+        <h4>🧮 算算看你的額度夠不夠</h4>
+        <div class="field mt">
+          <label>想生成的歌曲總數（首）</label>
+          <input class="inp" type="number" id="songNum" value="10" min="1" max="999">
+        </div>
+        <div class="grid g3" id="calcOut" style="gap:10px"></div>
+        <div class="note tip" id="calcTip"></div>
+        <hr class="s">
+        <h4>⬇ 再算算 MP3 下載次數</h4>
+        <div class="field mt">
+          <label>想下載存檔的歌曲數（首）</label>
+          <input class="inp" type="number" id="dlNum" value="3" min="0" max="99">
+        </div>
+        <div class="note" id="dlTip"></div>
+      </div>
+    </div>
+
+    <div class="tblwrap mt2">
+      <table class="tbl">
+        <thead><tr><th>方案</th><th>每日額度</th><th>生成次數</th><th>MP3 下載次數</th><th>商用授權</th><th>適合對象</th></tr></thead>
+        <tbody>
+          <tr><td><b>Free</b>（免費）</td><td>50 credits / 天</td><td>5 次（每次 2 首 = 10 首）</td>
+            <td><span class="tag e">終生僅 7 次（2026 新規）</span></td>
+            <td><span class="tag d">✕ 不可商用</span></td><td>課堂練習、嘗試題材</td></tr>
+          <tr><td><b>Pro Plan</b></td><td>付費額度</td><td>更多次</td><td><span class="tag c">✓ 依方案額度</span></td>
+            <td><span class="tag c">✓ 可商用</span></td><td>需要發表、營利使用者</td></tr>
+          <tr><td><b>Premier Plan</b></td><td>付費額度（更高）</td><td>大量生成</td><td><span class="tag c">✓ 大量下載</span></td>
+            <td><span class="tag c">✓ 可商用</span></td><td>大量產製、專案接案</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===== 02 MODES ===== -->
+  <section class="sec" id="modes" data-nav>
+    <div class="eyebrow">Unit 1 · Station 02</div>
+    <h2>操作介面模擬器：<span class="grad">Prompt 模式 vs Custom 模式</span></h2>
+    <p class="lead">Suno AI 的創作方式非常簡單：在腦中構思題材，點進側邊欄的 <kbd>Create</kbd> 就能開始。
+    下面是依教材重建的<b style="color:var(--tx)">可操作模擬介面</b>，切換模式、填寫欄位、按下 Create 看看會發生什麼事。</p>
+
+    <div class="grid g2 mt2">
+      <div class="card">
+        <span class="tag b">模式 A</span>
+        <h3 style="margin-top:10px">Prompt 模式（預設）</h3>
+        <p>創建新歌的<b style="color:var(--tx)">默認模式</b>，只需輸入<b style="color:var(--tx)">一個欄位</b>：Song Description 音樂描述。
+        點擊側邊欄 <kbd>Create</kbd> 預設就會是 Prompt 模式。</p>
+        <ul class="list">
+          <li>區塊：選擇模式（Custom）/ 選擇版本（v3…）/ Song Description / Instrumental 切換</li>
+          <li>適合：快速產出、讓 AI 自行發揮歌詞與結構</li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="tag a">模式 B</span>
+        <h3 style="margin-top:10px">Custom 自訂模式</h3>
+        <p>可設定<b style="color:var(--tx)">音樂風格、自訂歌詞、歌曲名稱</b>，把創作主導權拿回自己手上。</p>
+        <ul class="list">
+          <li><b style="color:var(--tx)">Lyrics</b>：輸入背景或關鍵字後按 <kbd>Surprise Me</kbd>（新版為 <kbd>Write with Suno</kbd>）協作生成歌詞</li>
+          <li><b style="color:var(--tx)">Instrumental</b>：人聲演唱與純音樂切換，開啟時為純音樂演奏</li>
+          <li><b style="color:var(--tx)">Style of Music</b>：指定音樂類型，可參考系統提供的提示</li>
+          <li><b style="color:var(--tx)">Exclude Styles</b>：排除不想要的風格（drone metal、beatboxing、melodic hardcore…）</li>
+          <li><b style="color:var(--tx)">Title</b>：歌曲名稱</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mock mt2 reveal">
+      <div class="mock-top">
+        <div class="dots"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div>
+        <span style="font-size:12px;color:var(--tx3);margin-left:6px">suno.com — 教學模擬介面（非官方，不會真的生成歌曲）</span>
+      </div>
+      <div class="mock-body">
+        <div class="mock-side">
+          <div class="mside-i on">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Create</div>
+          <div class="mside-i"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/></svg>Library</div>
+          <div class="mside-i"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Explore</div>
+          <div class="mside-i"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>Search</div>
+        </div>
+        <div class="mock-main">
+          <div class="mrow">
+            <div class="field" style="flex:0 0 auto;min-width:0">
+              <label>模式 Mode</label>
+              <div class="seg" id="modeSeg">
+                <button data-mode="prompt" class="on">Prompt</button>
+                <button data-mode="custom">Custom</button>
+              </div>
+            </div>
+            <div class="field" style="flex:0 0 auto;min-width:0">
+              <label>版本 Version</label>
+              <div class="seg" id="verSeg">
+                <button class="on">v4.5</button><button>v4</button><button>v3</button>
+              </div>
+            </div>
+            <div class="field" style="flex:0 0 auto;min-width:0">
+              <label>Upload</label>
+              <button class="btn ghost sm" id="uploadFake" style="border-radius:12px">⬆ Upload Audio</button>
+            </div>
+          </div>
+
+          <div id="panePrompt">
+            <div class="field">
+              <label>Song Description <span class="q">?</span></label>
+              <textarea class="inp" id="promptDesc" maxlength="200" placeholder="輸入所需的音樂描述，例如情緒氛圍、故事背景…">a syncopated future bass song about finding love on a rainy day</textarea>
+              <div class="count"><span id="c1">0</span>/200</div>
+            </div>
+            <label class="switch"><input type="checkbox" id="ins1"><span class="track"></span>Instrumental（純音樂）</label>
+          </div>
+
+          <div id="paneCustom" style="display:none">
+            <div class="field">
+              <label>Lyrics <span class="q">?</span></label>
+              <textarea class="inp" id="cLyrics" maxlength="3000" placeholder="Enter your own lyrics or describe a song and click Write About…" style="min-height:130px"></textarea>
+              <div class="count"><span id="c2">0</span>/3000</div>
+              <div class="chips">
+                <button class="chip" id="surprise">✨ Surprise Me / Write with Suno</button>
+                <button class="chip" data-fill="lyric1">填入：除夕之夜（節選）</button>
+                <button class="chip" data-fill="lyric2">填入：辣炒年糕（節選）</button>
+              </div>
+            </div>
+            <div class="mrow">
+              <div class="field">
+                <label>Style of Music <span class="q">?</span></label>
+                <input class="inp" id="cStyle" maxlength="120" placeholder="Enter style of music">
+                <div class="count"><span id="c3">0</span>/120</div>
+                <div class="chips" id="styleChips"></div>
+              </div>
+              <div class="field">
+                <label>Exclude Styles <span class="q">?</span></label>
+                <input class="inp" id="cExclude" maxlength="120" placeholder="drone metal　beatboxing　melodic hardcore…">
+                <div class="count"><span id="c4">0</span>/120</div>
+              </div>
+            </div>
+            <div class="mrow">
+              <div class="field">
+                <label>Title <span class="q">?</span></label>
+                <input class="inp" id="cTitle" maxlength="80" placeholder="Enter a title">
+                <div class="count"><span id="c5">0</span>/80</div>
+              </div>
+              <div class="field" style="flex:0 0 auto;min-width:0;padding-top:22px">
+                <label class="switch"><input type="checkbox" id="ins2"><span class="track"></span>Instrumental</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mock-foot">
+        <button class="btn-create" id="createBtn">Create</button>
+        <button class="btn ghost sm" id="clearBtn">Clear</button>
+        <span class="credit">🪙 <b id="creditNum">50</b> Credits ・ <span id="creditDate"></span></span>
+      </div>
+    </div>
+    <div class="result" id="resultArea"></div>
+
+    <div class="note mt"><b>生成邏輯：</b>輸入歌曲描述後，系統會用<b>相同歌詞</b>生成<b>兩個不同旋律</b>的歌曲版本 → 聆聽後挑選喜歡的那一首。</div>
+    <div class="note warn"><b>下載前請三思（2026 新規）：</b>免費版<b>終生只能下載 7 次 MP3</b>，先把兩個版本都聽完再決定要下載哪一首。</div>
+    <div class="note tip"><b>存檔：</b>在歌曲播放頁按<b>紅圈處（下載按鈕）</b>即可下載存檔；歌曲也會留在左側 <kbd>Library</kbd>。</div>
+    <div class="disclaimer-mini">📌 本模擬器為<b>理論基礎演示</b>，欄位名稱與實際操作請以教師課堂授課狀況為主。</div>
+  </section>
+
+  <!-- ===== 03 LAB ===== -->
+  <section class="sec" id="lab" data-nav>
+    <div class="eyebrow">Unit 1 · Station 03</div>
+    <h2>Prompt <span class="grad">實驗室</span>：寫出更精確的音樂描述</h2>
+    <p class="lead">教材的「AI 音樂生成小技巧」：<b style="color:var(--tx)">詳細輸入，所產生的結果就會更精確。</b>
+    請點選下方條件，系統會自動組出 Prompt 模式的描述，以及 Custom 模式的欄位建議，一鍵複製貼到 Suno AI。</p>
+
+    <div class="lab mt2">
+      <div class="card">
+        <div class="optgroup"><label>語言規範 Language</label><div class="pills" data-group="lang"></div></div>
+        <div class="optgroup"><label>情緒感覺 Mood</label><div class="pills" data-group="mood"></div></div>
+        <div class="optgroup"><label>音樂風格 Style</label><div class="pills" data-group="style"></div></div>
+        <div class="optgroup"><label>節奏變化 Tempo</label><div class="pills" data-group="tempo"></div></div>
+        <div class="optgroup"><label>樂器選擇 Instruments（可多選）</label><div class="pills" data-group="inst"></div></div>
+        <div class="optgroup"><label>主題情境 Topic</label>
+          <div class="pills" data-group="topic"></div>
+          <input class="inp mt" id="topicInput" placeholder="或自行輸入題材，例如：外婆的廚房、畢業典禮、深夜的便利店…">
+        </div>
+        <div class="row">
+          <button class="btn pri sm" id="labGen">⚡ 生成 Prompt</button>
+          <button class="btn ghost sm" id="labRandom">🎲 隨機組合</button>
+          <button class="btn ghost sm" id="labReset">重設</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="tabs" id="labTabs">
+          <button class="tab on" data-pane="p1">Prompt 模式描述</button>
+          <button class="tab" data-pane="p2">Custom 模式欄位</button>
+          <button class="tab" data-pane="p3">英文對照版</button>
+        </div>
+        <div class="tabpane on" id="p1">
+          <div class="outbox"><button class="copybtn" data-copy="out1">複製</button><pre id="out1">請在左側選擇條件後按「⚡ 生成 Prompt」。</pre></div>
+          <div class="note tip"><b>使用方式：</b>Suno AI → <kbd>Create</kbd> → 預設 Prompt 模式 → 貼進 <b>Song Description</b>（上限 200 字）→ <kbd>Create</kbd>。</div>
+        </div>
+        <div class="tabpane" id="p2">
+          <div class="grid" style="gap:12px">
+            <div class="outbox"><button class="copybtn" data-copy="out2a">複製</button>
+              <h4 style="color:var(--acc2);margin-bottom:6px">Title 歌曲名稱</h4><pre id="out2a">—</pre></div>
+            <div class="outbox"><button class="copybtn" data-copy="out2b">複製</button>
+              <h4 style="color:var(--acc2);margin-bottom:6px">Style of Music 音樂風格</h4><pre id="out2b">—</pre></div>
+            <div class="outbox"><button class="copybtn" data-copy="out2c">複製</button>
+              <h4 style="color:var(--acc2);margin-bottom:6px">Lyrics 歌詞草稿（再按 Surprise Me / Write with Suno 擴寫）</h4><pre id="out2c">—</pre></div>
+            <div class="outbox"><button class="copybtn" data-copy="out2d">複製</button>
+              <h4 style="color:var(--acc2);margin-bottom:6px">Exclude Styles 建議排除</h4><pre id="out2d">—</pre></div>
+          </div>
+        </div>
+        <div class="tabpane" id="p3">
+          <div class="outbox"><button class="copybtn" data-copy="out3">複製</button><pre id="out3">—</pre></div>
+          <div class="note">教材範例：<b>a syncopated future bass song about finding love on a rainy day</b> —— 一句話就包含了節奏（syncopated）、風格（future bass）、主題情境（finding love on a rainy day）。</div>
+        </div>
+        <div class="row" style="margin-top:16px">
+          <button class="btn ghost sm" data-go="modes">↘ 帶到上方模擬器試用</button>
+          <button class="btn ghost sm" id="applyToMock">📋 直接填入模擬器</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid g2 mt2">
+      <div class="card reveal">
+        <h3>🔍 AI 音樂生成小技巧（教材重點）</h3>
+        <div class="tblwrap">
+          <table class="tbl">
+            <tbody>
+              <tr><td><b>語言規範</b></td><td>中文、英文、日文、韓文……</td></tr>
+              <tr><td><b>情緒感覺</b></td><td>快樂、悲傷、激動、平靜……</td></tr>
+              <tr><td><b>音樂風格</b></td><td>流行樂 pop music、民謠 folk music……</td></tr>
+              <tr><td><b>節奏變化</b></td><td>快、慢、適中</td></tr>
+              <tr><td><b>樂器選擇</b></td><td>鋼琴、小提琴、鼓聲、薩克斯風……</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card reveal">
+        <h3>🌐 教材補充網站三類型</h3>
+        <div class="grid" style="gap:10px;margin-top:10px">
+          <div class="linkcard"><span class="ic">🎼</span><div><h4>音樂風格提示詞</h4><p>坊間常見的音樂風格用語，Suno AI 可以正確理解。</p></div></div>
+          <div class="linkcard"><span class="ic">🧩</span><div><h4>Suno AI 指示詞生成網站</h4><p>用問問題的方式，幫你生成歌詞、音樂風格與歌曲名稱，複製貼上即可成歌。</p></div></div>
+          <div class="linkcard"><span class="ic">🎧</span><div><h4>音樂風格識別網站</h4><p>上傳歌曲的網路連結，即可分析這首歌的音樂風格。</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 04 STRUCTURE ===== -->
+  <section class="sec" id="structure" data-nav>
+    <div class="eyebrow">Unit 1 · Station 04</div>
+    <h2>流行歌曲的<span class="grad">結構地圖</span></h2>
+    <p class="lead">在 Custom 模式寫歌詞時，用 <kbd>[Verse]</kbd>、<kbd>[Chorus]</kbd>、<kbd>[Bridge]</kbd> 等標記，
+    Suno 就能理解段落配置。點擊下方色塊認識每一段，或按「▶ 播放順序」看完整安排。</p>
+
+    <div class="card mt2">
+      <div class="row" style="align-items:center">
+        <button class="btn pri sm" id="structPlay">▶ 播放順序</button>
+        <button class="btn ghost sm" id="structStop">■ 停止</button>
+        <span style="font-size:12.5px;color:var(--tx3)">一首歌的常見配置：Intro → Verse → Pre-Chorus → Chorus → Inter → Solo → Bridge → Outro</span>
+      </div>
+      <div class="structbar" id="structBar"></div>
+      <div class="structinfo" id="structInfo"></div>
+    </div>
+
+    <div class="grid g2 mt2">
+      <div class="card reveal">
+        <h3>📝 在 Suno 歌詞欄怎麼寫？</h3>
+        <div class="outbox mt" style="background:color-mix(in srgb,var(--bg) 55%,transparent)">
+          <div class="lyric"><span class="sec-t">[Verse 1]</span>北方的風，吹過那片山
+硝煙的雲，遮住家鄉的暖
+
+<span class="sec-t">[Chorus]</span>蛋香飄，戰火燃
+平凡的願望卻換來永別的寒
+
+<span class="sec-t">[Bridge]</span>黃金般的米粒，滿是人間煙火
+
+<span class="sec-t">[Outro]</span>一碗蛋炒飯，在歷史裡沉澱</div>
+        </div>
+        <p class="mt">以上取自教材中 ChatGPT 協作生成的《蛋炒飯》歌詞，加上段落標記就能直接貼入 Custom 模式的 Lyrics 欄。</p>
+      </div>
+      <div class="card reveal">
+        <h3>🍜 教材實例：辣炒年糕</h3>
+        <p>教材展示的成品歌曲〈辣炒年糕〉：</p>
+        <ul class="list mt">
+          <li><b style="color:var(--tx)">風格設定：</b>Kpop、電子音樂、DJ、夜店</li>
+          <li><b style="color:var(--tx)">生成資訊：</b>2024年12月12日 上午10:47 ・ 版本 v3 ・ 兩組作品（843202 / 843203）</li>
+          <li><b style="color:var(--tx)">歌詞節選：</b>「霓虹小巷香氣四溢／辣炒年糕美味無比／一口咬下幸福的味道／心情瞬間衝上雲霄」</li>
+          <li><b style="color:var(--tx)">段落標記：</b>[Verse 1]、[Verse 2] 等，讓 AI 知道何處該換段</li>
+          <li><b style="color:var(--tx)">存檔：</b>按播放列旁的下載（紅圈處）即可存檔 —— 注意免費版終生僅 7 次</li>
+        </ul>
+        <div class="note">同一首歌詞、不同版本代號 → 得到<b>不同旋律</b>的兩個版本，這正是 Suno 每次生成兩首的用意。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 05 CHATGPT ===== -->
+  <section class="sec" id="gpt" data-nav>
+    <div class="eyebrow">Unit 1 · Station 05</div>
+    <h2>用 <span class="grad">ChatGPT</span> 協作創作歌曲</h2>
+    <p class="lead">亦可使用向 ChatGPT 提問的技巧創作出歌曲，最後再將協作內容<b style="color:var(--tx)">複製貼上至 Suno AI</b>，便能生成歌曲。</p>
+
+    <div class="grid g4 mt2" id="flowCards"></div>
+
+    <h3 class="mt2">💬 教材實錄還原：從一句提問到一首完整的歌</h3>
+    <p>以下重現教材中的對話流程（題材具歷史與情感衝擊，課堂上僅作為「提問 → 風格建議 → 歌詞產出」的技法示範）。</p>
+
+    <div class="mt">
+      <div class="acc" data-acc>
+        <div class="acc-h"><span class="ic">1️⃣</span><h4>提問：給出題材，並請 AI 推薦適合的音樂風格</h4>
+          <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>
+        <div class="acc-b"><div class="acc-b-in">
+          <div class="chat">
+            <div class="msg user"><span class="av u">我</span><div class="bub">我想寫一首具有歷史與情感衝擊題材的敘事歌曲（教材示例：以歷史人物與日常食物形成的強烈對比為題），並請推薦適合這首歌的音樂風格。</div></div>
+            <div class="msg"><span class="av ai">AI</span><div class="bub">這是一個非常特別且具有歷史與情感衝擊的題材，以下是建議的創作方向與適合的音樂風格：<br><br>
+              <b>歌曲創作方向</b><br>
+              1. <b>叙事風格</b>：以敘事方式描述事件與代價，並融入歷史背景的緊張氣氛與個人情感。<br>
+              2. <b>對比手法</b>：用日常場景與戰爭的殘酷形成對比，凸顯人性的脆弱與荒誕。<br>
+              3. <b>情感層次</b>：從平凡的渴望到生命消逝的過程，加入對歷史、命運和家庭的反思。</div></div>
+          </div>
+          <div class="note tip"><b>技巧解析：</b>提問時同時要「題材」＋「請推薦音樂風格」，AI 就會一次給你創作方向與可貼進 Suno 的 Style 關鍵字。</div>
+        </div></div>
+      </div>
+
+      <div class="acc" data-acc>
+        <div class="acc-h"><span class="ic">2️⃣</span><h4>AI 回覆：四種適合的音樂風格（含代表範例）</h4>
+          <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>
+        <div class="acc-b"><div class="acc-b-in">
+          <div class="grid g2">
+            <div class="card"><span class="tag a">風格 1</span><h4 class="mt">悲劇敘事民謠</h4>
+              <p>以吉他或琵琶等樂器為基礎，輕柔的旋律配合低沉的嗓音，營造感傷的敘事感，如中國民歌風格或現代民謠。</p>
+              <p style="font-size:12.5px;color:var(--tx3)">代表範例：《南山南》（馬頔）</p></div>
+            <div class="card"><span class="tag b">風格 2</span><h4 class="mt">新古典鋼琴與管弦樂</h4>
+              <p>用鋼琴和弦樂帶來莊嚴的氛圍，強調歷史的重量感與生命的無常。</p>
+              <p style="font-size:12.5px;color:var(--tx3)">代表範例：《菊次郎的夏天》（久石讓）</p></div>
+            <div class="card"><span class="tag c">風格 3</span><h4 class="mt">中國風搖滾</h4>
+              <p>想增強戲劇性時加入搖滾元素，以大鼓和笛子點綴，增強情感爆發力。</p>
+              <p style="font-size:12.5px;color:var(--tx3)">代表風格：鄭鈞、汪峰的作品</p></div>
+            <div class="card"><span class="tag d">風格 4</span><h4 class="mt">諷刺性電子音樂</h4>
+              <p>想表現荒誕感，可用電子音樂和不協和的聲音效果，反映歷史的諷刺意味與人性的荒謬。</p></div>
+          </div>
+          <div class="note mt"><b>結構與樂器搭配建議：</b>① 開場用柔和的鋼琴或古箏，營造和平日常的氛圍；② 中段加入緊張感的鼓點或戰爭聲效，象徵戰爭的侵入與悲劇性轉折；③ 最後用低沉的和弦或單一樂器結尾，留給聽眾深思的空間。</div>
+        </div></div>
+      </div>
+
+      <div class="acc" data-acc>
+        <div class="acc-h"><span class="ic">3️⃣</span><h4>追問：「請幫我寫歌詞」→ 產出完整歌詞</h4>
+          <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>
+        <div class="acc-b"><div class="acc-b-in">
+          <div class="chat">
+            <div class="msg user"><span class="av u">我</span><div class="bub">請幫我寫歌詞</div></div>
+            <div class="msg"><span class="av ai">AI</span><div class="bub">以下是以敘事風格創作的歌詞，呈現故事同時帶有情感與歷史反思。<br><b>生成歌曲：《蛋炒飯》</b>（含 Verse 1 / Chorus / Verse 2 / Chorus / Bridge / Final Chorus / Outro 七段）</div></div>
+          </div>
+          <div class="outbox mt"><button class="copybtn" data-copy="lyricFull">複製全歌詞</button>
+            <div class="lyric" id="lyricFull"><span class="sec-t">（Verse 1）</span>北方的風，吹過那片山，
+硝煙的雲，遮住家鄉的暖。
+前線的帳篷，短暫的平安，
+一碗蛋炒飯，是他簡單的期盼。
+
+<span class="sec-t">（Chorus）</span>蛋香飄，戰火燃，
+平凡的願望卻換來永別的寒。
+一顆炸彈，鋪滿天，
+問蒼天，為何英雄也難敵人間？
+
+<span class="sec-t">（Verse 2）</span>父親的目光，從未有溫暖，
+革命的路，血與汗鋪滿。
+他說「報國」，便不顧一切向前，
+可那一碗蛋炒飯，誰料成了遺願？
+
+<span class="sec-t">（Chorus）</span>蛋香飄，戰火燃，
+平凡的願望卻換來永別的寒。
+一顆炸彈，鋪滿天，
+問蒼天，為何英雄也難敵人間？
+
+<span class="sec-t">（Bridge）</span>黃金般的米粒，滿是人間煙火，
+炸彈劃破夜空，帶走一顆赤子心。
+廚房裡的溫暖，變成永恆的追問，
+蛋炒飯的香味，卻再也回不來了。
+
+<span class="sec-t">（Final Chorus）</span>蛋香飄，戰火燃，
+平凡的願望卻換來永別的寒。
+一碗飯，這麼簡單，
+卻埋葬了青春，埋葬了明天。
+
+<span class="sec-t">（Outro）</span>北方的風，吹過那片山，
+誰還記得，那平凡的期盼？
+一碗蛋炒飯，在歷史裡沉澱，
+多少笑與淚，都融進這碗飯間。</div>
+          </div>
+          <div class="note warn mt">⚠️ <b>課堂提醒：</b>此例僅示範「提問結構 → 風格建議 → 歌詞產出」的工作流。實際創作請選擇合適、尊重他人與史實的題材。</div>
+        </div></div>
+      </div>
+
+      <div class="acc" data-acc>
+        <div class="acc-h"><span class="ic">4️⃣</span><h4>最後一步：把成果搬進 Suno AI 生成歌曲</h4>
+          <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>
+        <div class="acc-b"><div class="acc-b-in">
+          <ol class="steps">
+            <li>切換到 <b>Custom 自訂模式</b>。</li>
+            <li>把 ChatGPT 寫好的歌詞貼進 <b>Lyrics</b>（可加上 [Verse] / [Chorus] 段落標記）。</li>
+            <li>把推薦的音樂風格貼進 <b>Style of Music</b>，例如：悲劇敘事民謠、鋼琴與弦樂、中國風搖滾。</li>
+            <li>不需要的人聲或風格寫入 <b>Exclude Styles</b>；純演奏則開啟 <b>Instrumental</b>。</li>
+            <li>填上 <b>Title</b>（例：蛋炒飯）→ 按 <b>Create</b> → 聆聽兩個版本 → 確定後才下載存檔（免費版終生僅 7 次）。</li>
+          </ol>
+          <div class="row" style="margin-top:12px">
+            <button class="btn ghost sm" id="demoFill">🪄 幫我把這首歌填入上方模擬器</button>
+            <button class="btn ghost sm" data-go="modes">前往模擬器</button>
+          </div>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 06 SCRIPT ===== -->
+  <section class="sec" id="script" data-nav>
+    <div class="eyebrow">Unit 2 · Station 06</div>
+    <h2>如何講故事？<span class="grad">撰寫腳本的重點</span></h2>
+    <p class="lead">影片製作流程 → 影片後製流程 → 腳本撰寫。腳本格式可參「生成式 AI 影片報告單」，
+    可自行撰寫，亦可請 AI 幫你撰寫。以下是老師的指示詞與 ChatGPT 產出的<b style="color:var(--tx)">短片腳本：除夕之夜</b>。</p>
+
+    <div class="card mt2">
+      <h3>★ 老師的指示詞（Prompt）</h3>
+      <div class="outbox mt"><button class="copybtn" data-copy="teacherPrompt">複製指示詞</button>
+        <pre id="teacherPrompt">短片腳本：除夕之夜
+開場要吸引人，結尾要引人深思，從女性獨立的角度出發。
+請以表格形式細化腳本，欄位包含：分段、內容、使用配樂、預估秒數。</pre></div>
+      <div class="note tip"><b>指示詞設計三要素：</b>① 明確主題（除夕之夜）；② 敘事要求（開場吸引人、結尾引人深思）；③ 觀點與輸出格式（女性獨立角度、表格化分鏡）。</div>
+    </div>
+
+    <h3 class="mt2">🎞️ 分鏡腳本：除夕之夜（點擊卡片展開細節）</h3>
+    <div class="timeline" id="shotTimeline"></div>
+    <div class="shots mt" id="shots"></div>
+
+    <div class="card mt2">
+      <h3>📒 教材筆記：這支腳本為什麼有效？</h3>
+      <ol class="steps">
+        <li><b>開場</b>用女主角的內心獨白快速吸引觀眾共鳴。</li>
+        <li><b>婆媳矛盾與婚姻問題</b>是劇情衝突的核心，透過對話與細節展示情緒張力。</li>
+        <li><b>結尾的陽台場景</b>隱喻新生活的開端，結合背景音樂提升觀眾情緒的觸動感。</li>
+        <li><b>音樂選擇</b>偏向鋼琴與弦樂，烘托情感起伏並支持女性自我重生的主題。</li>
+      </ol>
+      <div class="note">◎ 上面內容為 ChatGPT 生成的腳本內容，<b>配樂部分只要用一首 AI 歌曲串連就可以了！</b>（也就是第一單元用 Suno 生成的那首歌）</div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn ghost sm" data-go="editor">🎞️ 把這份腳本放進時間軸看看 →</button>
+      </div>
+    </div>
+
+    <div class="grid g2 mt2">
+      <div class="card reveal">
+        <h3>🎬 影片製作流程</h3>
+        <ol class="steps">
+          <li>構思主題與故事大綱（要講什麼故事？給誰看？）</li>
+          <li>撰寫／AI 生成腳本與分鏡（含秒數、對白、配樂）</li>
+          <li>蒐集與生成素材（文本、圖像、動畫、音效、語音）</li>
+          <li>進入剪輯軟體（剪映）排列時間軸</li>
+          <li>後製：字幕、轉場、色彩、音量平衡</li>
+          <li>匯出影片，取得完整成品檔案</li>
+        </ol>
+      </div>
+      <div class="card reveal">
+        <h3>🛠️ 影片後製流程</h3>
+        <ol class="steps">
+          <li>粗剪：素材排序、裁掉多餘片段</li>
+          <li>音樂對齊：音軌與影片軌道完全對齊，避免影音不同步</li>
+          <li>字幕：自動歌詞 → 校正 → 字形與顏色調整</li>
+          <li>效果：轉場（光暈、模糊、淡入淡出）、色彩調整、圖層與遮罩</li>
+          <li>預覽檢查：邊播放邊確認字幕與節奏</li>
+          <li>匯出設定 → 下載成品檔案</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 07 ASSETS ===== -->
+  <section class="sec" id="assets" data-nav>
+    <div class="eyebrow">Unit 2 · Station 07</div>
+    <h2>生成式 AI <span class="grad">影片素材蒐集</span></h2>
+    <p class="lead">四大類素材 ＋ 蒐集四步驟，以及「飲食文學」影片製作參考方向。</p>
+
+    <div class="tabs mt2" id="asTabs">
+      <button class="tab on" data-pane="a1">📄 文本素材</button>
+      <button class="tab" data-pane="a2">🖼️ 視覺素材</button>
+      <button class="tab" data-pane="a3">🔊 音效與語音</button>
+      <button class="tab" data-pane="a4">🎚️ 後製素材</button>
+      <button class="tab" data-pane="a5">🧭 蒐集步驟</button>
+    </div>
+    <div class="tabpane on" id="a1"><div class="card">
+      <h3>文本素材</h3><p>生成影片時，文本是許多 AI 工具的核心輸入。</p>
+      <ul class="list mt">
+        <li><b style="color:var(--tx)">劇本或描述：</b>用於生成對應的影片內容，例如場景描述、角色動作或故事情節。</li>
+        <li><b style="color:var(--tx)">字幕或旁白：</b>可直接生成，或用於後期配合影片。</li>
+        <li><b style="color:var(--tx)">提示詞（Prompts）：</b>清晰且詳細的提示詞，用於引導生成圖像或動畫。</li>
+      </ul>
+      <div class="note tip">對應工具：ChatGPT（腳本／歌詞／旁白稿）、Suno AI（歌詞）。</div>
+    </div></div>
+    <div class="tabpane" id="a2"><div class="card">
+      <h3>視覺素材</h3><p>生成式 AI 需要參考或生成的圖像素材。</p>
+      <ul class="list mt">
+        <li><b style="color:var(--tx)">基礎圖片：</b>可供風格轉換（Style Transfer）或場景生成的參考圖片，例如角色設計圖、背景草圖。</li>
+        <li><b style="color:var(--tx)">AI 生成圖像：</b>使用圖像生成工具（如 DALL·E、MidJourney）創建的背景、角色或物品圖像。</li>
+      </ul>
+      <div class="note">教材建議：一部影片約需準備 <b>10 張圖片 + 1 首歌曲</b>（剪映素材區匯入清單）。</div>
+    </div></div>
+    <div class="tabpane" id="a3"><div class="card">
+      <h3>音效與語音素材</h3><p>生成式 AI 能製作或強化音效與語音。</p>
+      <ul class="list mt">
+        <li><b style="color:var(--tx)">提示聲音：</b>用於訓練 AI 模型生成特定語音或效果的參考音頻。</li>
+        <li><b style="color:var(--tx)">背景音樂：</b>AI 生成的音樂（如 Amper Music 或 AIVA），用於匹配影片節奏。</li>
+        <li><b style="color:var(--tx)">語音生成素材：</b>旁白文本，搭配 TTS（Text-to-Speech）工具生成自然語音。</li>
+      </ul>
+    </div></div>
+    <div class="tabpane" id="a4"><div class="card">
+      <h3>影片後製素材<span class="tag d" style="margin-left:8px">不強制</span></h3>
+      <p>AI 生成的影片通常需要後期處理來完善。</p>
+      <ul class="list mt">
+        <li><b style="color:var(--tx)">轉場效果：</b>例如光暈、模糊、淡入淡出的過渡模板。</li>
+        <li><b style="color:var(--tx)">色彩調整工具：</b>調整 AI 生成影像的色調，確保畫面一致性。</li>
+        <li><b style="color:var(--tx)">圖層與遮罩：</b>用於合成影片中的多個畫面或細節。</li>
+      </ul>
+    </div></div>
+    <div class="tabpane" id="a5"><div class="card">
+      <h3>蒐集素材步驟</h3>
+      <div class="tblwrap mt">
+        <table class="tbl">
+          <thead><tr><th style="width:200px">步驟</th><th>說明</th></tr></thead>
+          <tbody>
+            <tr><td><b>① 明確影片需求</b></td><td>撰寫故事大綱、設定角色和場景。</td></tr>
+            <tr><td><b>② 準備提示詞與參考素材</b></td><td>定義 AI 生成的具體風格或元素。</td></tr>
+            <tr><td><b>③ 使用多元工具結合</b></td><td>圖像生成工具（製作背景或角色）＋ 動畫生成工具（讓靜態圖像動起來）＋ 語音與音樂生成工具（補充聲音素材）。</td></tr>
+            <tr><td><b>④ 後製整合</b></td><td>將生成素材進行剪輯、調整和效果增強。</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note tip">★ 小撇步：<b>可以先將所有素材整理在一個資料夾內</b>，匯入剪映時一次拖曳，效率最高。</div>
+    </div></div>
+
+    <div class="divider"></div>
+    <h3>🍲 「飲食文學」生成式 AI 影片製作參考</h3>
+    <div class="grid g2 mt" id="dietCards"></div>
+  </section>
+
+  <!-- ===== 08 EDITOR / 時間軸 ===== -->
+  <section class="sec" id="editor" data-nav>
+    <div class="eyebrow">Unit 2 · Station 08</div>
+    <h2>剪映操作介面導覽：<span class="grad">認識時間軸</span></h2>
+    <p class="lead">教材「柒、剪映操作介面介紹（以國際版為主）」。下方是<b style="color:var(--tx)">可以實際操作的剪映介面模擬</b>：
+    點左側工具列換素材、點素材加到時間軸、<b style="color:var(--acc2)">拖曳片段右緣即可拉長／縮短</b>、按 ▶ 預覽播放頭移動與字幕同步，
+    並隨時檢查「音樂是否與影片完全對齊」。</p>
+
+    <div class="note warn"><b>軌道順序（與剪映相同）：</b>時間軸由上而下依序為
+      <b style="color:var(--warn)">① 字幕軌（最上方）</b> → <b style="color:var(--acc2)">② 影片軌（中間）</b> → <b style="color:var(--acc)">③ 音訊軌（最下方）</b>。
+      字幕必須放在影片軌之上，才會疊加在畫面上顯示。</div>
+
+    <div class="editor mt2 reveal" id="editorMock">
+      <div class="ed-top" id="zoneTop">
+        <span class="ed-logo">剪映 CapCut</span>
+        <input class="ed-name" id="projName" value="除夕之夜" title="專案名稱">
+        <button class="ed-iconbtn" title="復原">↶</button>
+        <button class="ed-iconbtn" title="重做">↷</button>
+        <button class="ed-export" id="edExport">匯出 Export</button>
+        <span class="hot" data-hs="1" style="position:relative;left:-4px;top:-2px;animation:none">1</span>
+        <span class="hot" data-hs="7" style="position:relative;left:-52px;top:-2px;animation:none">7</span>
+      </div>
+
+      <div class="ed-mid">
+        <div class="ed-rail" id="edRail"></div>
+        <div class="ed-media" id="edMedia"></div>
+        <div class="ed-preview">
+          <div class="ed-stage" id="edStage">
+            <div class="ed-scene" id="edScene">🍲</div>
+            <div class="ed-sceneN" id="edSceneN">場景 1 ・ 開場傷感的序曲</div>
+            <div class="ed-sub" id="edSub">娘家的飯桌今年又少了我</div>
+            <span class="hot" data-hs="4" style="top:8px;right:8px">4</span>
+          </div>
+          <div class="ed-ctrl">
+            <button class="ctl" id="edPrev" title="回到開頭">⏮</button>
+            <button class="ctl main" id="edPlay" title="播放／暫停">▶</button>
+            <button class="ctl" id="edNext" title="到結尾">⏭</button>
+            <span class="ed-time" id="edTime">00:00.0 / 00:14.0</span>
+            <span class="tag b" style="margin-left:6px">預覽區</span>
+          </div>
+        </div>
+        <span class="hot" data-hs="2" style="left:20px;top:120px">2</span>
+        <span class="hot" data-hs="3" style="left:150px;top:120px">3</span>
+      </div>
+
+      <div class="ed-tl" id="zoneTl">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+          <span class="tag a">🎞️ 時間軸 Timeline</span>
+          <span style="font-size:11.5px;color:var(--tx3)">由上而下：字幕軌 → 影片軌 → 音訊軌 ・ 拖右緣把手可調整長度</span>
+          <span class="hot" data-hs="5" style="position:relative;margin-left:auto">5</span>
+          <span class="hot" data-hs="6" style="position:relative">6</span>
+        </div>
+        <div class="ed-ruler" id="edRuler"></div>
+        <div id="edTracks"></div>
+      </div>
+
+      <div class="ed-foot">
+        <span style="font-size:12px;color:var(--tx3)" id="selInfo">未選取片段</span>
+        <button class="mini" id="actLen">＋ 拉長 0.5s</button>
+        <button class="mini" id="actShort">－ 縮短 0.5s</button>
+        <button class="mini" id="actSplit">✂ 分割</button>
+        <button class="mini" id="actDel">🗑 刪除</button>
+        <button class="mini" id="actReset">↺ 還原範例</button>
+        <div class="alignbar" id="alignBar"></div>
+      </div>
+    </div>
+    <div class="disclaimer-mini">📌 上方為剪映介面的<b>模擬示意（理論基礎）</b>，實際介面配置與操作細節，請以教師課堂授課狀況為主。</div>
+
+    <div class="grid g2 mt2">
+      <div class="card reveal">
+        <h3>🔎 介面分區對照（點擊可高亮）</h3>
+        <div class="hslist mt" id="hsList"></div>
+      </div>
+      <div class="card reveal">
+        <h3>🎚️ 時間軸三軌（由上而下）與素材規則</h3>
+        <div class="tblwrap mt">
+          <table class="tbl">
+            <thead><tr><th>位置</th><th>軌道</th><th>放什麼</th><th>長度調整規則</th></tr></thead>
+            <tbody>
+              <tr><td><b style="color:var(--warn)">最上方</b></td><td><b>字幕軌</b></td>
+                <td>自動歌詞（Auto lyrics）產生的歌詞字幕，疊加在畫面上</td>
+                <td>可依句長微調，需涵蓋整段影片</td></tr>
+              <tr><td><b>中間</b></td><td><b>影片軌</b></td>
+                <td>10 張圖片、動畫素材，依分鏡順序排列</td>
+                <td>圖片可<b>往右拖曳拉長</b>；<b style="color:var(--bad)">動畫只能縮減，不能拉長</b></td></tr>
+              <tr><td><b>最下方</b></td><td><b>音訊軌</b></td>
+                <td>Suno AI 生成的歌曲（一首串連到底）＋環境音效</td>
+                <td>必須與影片<b style="color:var(--ok)">完全對齊</b>，否則影音不同步</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note warn"><b>教材原文：</b>「圖片可以拉長時間（往右拖曳即可），動畫只能縮減，不能拉長！」</div>
+        <div class="note warn"><b>教材原文：</b>「音樂部分（紅圈處）一定要跟影片部分完全對齊，不然會變成影音不同步！」</div>
+        <div class="note tip"><b>一部完整的影片架構</b>＝字幕軌歌詞 ＋ 影片軌素材 ＋ 音訊軌配樂（＋ 不強制的轉場／特效／濾鏡）。</div>
+      </div>
+    </div>
+
+    <div class="grid g2 mt2">
+      <div class="card reveal">
+        <h3>🧪 時間軸小挑戰</h3>
+        <ol class="steps">
+          <li>目前的範例<b>音樂只有 10 秒、影片有 12 秒</b> → 右下角會出現「影音未對齊」警告。</li>
+          <li>請選取<b>最下方音訊軌</b>的 <b>♪ AI 歌曲</b>，拖右緣把手或按「＋ 拉長 0.5s」，把它拉到與影片等長。</li>
+          <li>警告變成 <b style="color:var(--ok)">✓ 已對齊</b> 就成功了！</li>
+          <li>再試試：選取影片軌的「轉場動畫」按「＋ 拉長」→ 應該會被擋下並提示<b>動畫只能縮減</b>。</li>
+          <li>按 ▶ 播放，觀察<b>最上方字幕軌</b>、播放頭、預覽畫面三者是否同步。</li>
+        </ol>
+      </div>
+      <div class="card reveal">
+        <h3>🖱️ 操作提示</h3>
+        <ul class="list mt">
+          <li><b style="color:var(--tx)">左側工具列：</b>媒體 / 音訊 / 文字 / 特效 / 轉場 / 濾鏡，點擊可切換素材區內容。</li>
+          <li><b style="color:var(--tx)">素材區：</b>點素材即可加入對應軌道（等同於拖曳至時間軸）。</li>
+          <li><b style="color:var(--tx)">時間軸：</b>點片段選取 → 下方可拉長、縮短、分割、刪除。</li>
+          <li><b style="color:var(--tx)">刻度尺：</b>每格 1 秒，紅色直線為<b>播放頭</b>，決定預覽區顯示哪一個畫面。</li>
+          <li><b style="color:var(--tx)">字幕：</b>最上方字幕軌對應預覽區下方的橘色白字，教材說明可直接點一下修改。</li>
+        </ul>
+        <div class="note">◎ 特效／轉場／濾鏡屬於「後製素材（不強制）」，此模擬器只提供說明，不會佔用軌道。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 09 CAPCUT FLOW ===== -->
+  <section class="sec" id="capcut" data-nav>
+    <div class="eyebrow">Unit 2 · Station 09</div>
+    <h2>建議使用軟體：<span class="grad">剪映 / CapCut</span> 剪輯八步驟</h2>
+    <p class="lead">教材以國際版為主。先認識兩個版本的差異，再依步驟完成從匯入到匯出的完整流程。</p>
+
+    <div class="tblwrap mt2">
+      <table class="tbl">
+        <thead><tr><th>分類</th><th>網址</th><th>備註</th></tr></thead>
+        <tbody>
+          <tr><td><b>國際版（CapCut）</b></td><td>capcut.com/zh-tw/</td>
+            <td>① 有<b>線上網頁版</b>，可直接在網路上操作。<br>② 有電腦版可下載，但是<b>英文介面</b>。</td></tr>
+          <tr><td><b>中國版（剪映）</b></td><td>capcut.cn</td>
+            <td>① <b>沒有線上網頁版</b>，無法在網路上操作。<br>② 有電腦版可下載，但為<b>簡體中文介面</b>。</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="stepper mt2" id="ccStepper"></div>
+    <div class="stepbody" id="ccBody"></div>
+    <div class="stepnav">
+      <button class="btn ghost sm" id="ccPrev">← 上一步</button>
+      <span class="sp" id="ccCount"></span>
+      <button class="btn pri sm" id="ccNext">下一步 →</button>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <button class="btn ghost sm" data-go="editor">↖ 回到時間軸模擬器實際操作</button>
+    </div>
+
+    <div class="mt2">
+      <div class="card reveal">
+        <h3>🚫 常見錯誤與解法</h3>
+        <div class="tblwrap">
+          <table class="tbl">
+            <tbody>
+              <tr><td><b>影音不同步</b></td><td>音訊軌（最下方）沒有和影片軌<b>完全對齊</b> → 拖曳至起點一致、長度相同。</td></tr>
+              <tr><td><b>字幕沒顯示</b></td><td>字幕軌要放在<b>影片軌之上</b>才會疊加在畫面上。</td></tr>
+              <tr><td><b>動畫被拉壞</b></td><td>圖片可往右拖曳拉長，<b>動畫只能縮減，不能拉長</b>。</td></tr>
+              <tr><td><b>字幕沒有涵蓋全片</b></td><td>字幕軌比影片軌短 → 補上剩餘句段或延長最後一句。</td></tr>
+              <tr><td><b>字幕是簡體</b></td><td>剪映內建只有簡體中文 → 先把歌詞轉成繁體另存文字檔，校正時複製貼上。</td></tr>
+              <tr><td><b>匯出有浮水印</b></td><td>電腦版會出現商用提醒視窗，課堂作業可直接按提示按鈕繼續。</td></tr>
+              <tr><td><b>檔名亂取</b></td><td>先把<b>專案名稱</b>改成影片名稱，匯出時就不用另外取檔名。</td></tr>
+              <tr><td><b>配樂還沒下載就開剪</b></td><td>免費版 Suno <b>終生只能下載 7 次 MP3</b> → 先確定要用哪一首再下載。</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="disclaimer-mini">📌 以上步驟整理自教材，屬<b>理論基礎</b>；實際操作請以教師課堂授課狀況為主。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 10 QUIZ ===== -->
+  <section class="sec" id="quiz" data-nav>
+    <div class="eyebrow">Assessment · Station 10</div>
+    <h2>學習評量：<span class="grad">12 題互動測驗</span></h2>
+    <p class="lead">點選選項即會立即顯示正解與解說。全部作答完畢會結算分數，可反覆挑戰。</p>
+
+    <div class="quiz-head mt2">
+      <div class="qbar"><i id="qFill"></i></div>
+      <span class="tag b" id="qCount">已答 0 / 12</span>
+      <button class="btn ghost sm" id="quizReset">↻ 重新測驗</button>
+    </div>
+    <div id="quizBox"></div>
+    <div class="scorebox" id="scoreBox"></div>
+  </section>
+
+  <!-- ===== 11 TASK ===== -->
+  <section class="sec" id="task" data-nav>
+    <div class="eyebrow">Practice · Station 11</div>
+    <h2>實作任務<span class="grad">清單</span></h2>
+    <p class="lead">把兩份教材的操作整合成一張可勾選的實作清單，進度會自動儲存在你的瀏覽器（localStorage），下次回來仍保留。</p>
+
+    <div class="row mt2" style="align-items:center;gap:26px">
+      <svg class="donut" viewBox="0 0 42 42">
+        <circle cx="21" cy="21" r="15.9" fill="none" stroke="var(--line)" stroke-width="5"/>
+        <circle id="taskArc" cx="21" cy="21" r="15.9" fill="none" stroke="url(#g2)" stroke-width="5" stroke-linecap="round"
+                stroke-dasharray="100" stroke-dashoffset="100" transform="rotate(-90 21 21)" style="transition:stroke-dashoffset .6s var(--ease)"/>
+        <defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="var(--ok)"/><stop offset="1" stop-color="var(--acc2)"/></linearGradient></defs>
+        <text x="21" y="20.4" text-anchor="middle" font-size="7.4" font-weight="700" fill="var(--tx)" id="taskPct">0%</text>
+        <text x="21" y="26.4" text-anchor="middle" font-size="3.2" fill="var(--tx3)" id="taskCnt">0 / 0 完成</text>
+      </svg>
+      <div style="flex:1;min-width:220px">
+        <h3>交付成果</h3>
+        <ul class="list">
+          <li>一首 Suno AI 生成並下載的歌曲檔（MP3）—— <b style="color:var(--warn)">免費版終生僅 7 次下載額度，請謹慎使用</b>。</li>
+          <li>一份含分段、內容、配樂、預估秒數的分鏡腳本。</li>
+          <li>一部完成字幕與配樂、影音完全對齊的影片成品檔案。</li>
+          <li>整理好的素材資料夾（10 張圖片 ＋ 1 首 AI 歌曲）。</li>
+        </ul>
+        <div class="disclaimer-mini">📌 任務內容為<b>理論基礎</b>之練習建議，實際交付項目與時程請以教師課堂授課狀況為主。</div>
+      </div>
+      <button class="btn ghost sm" id="taskClear">清除進度</button>
+    </div>
+    <div class="grid g2 mt2" id="taskList"></div>
+  </section>
+
+  <!-- ===== 12 RES ===== -->
+  <section class="sec" id="res" data-nav>
+    <div class="eyebrow">Resources · Station 12</div>
+    <h2>資源<span class="grad">連結</span></h2>
+    <div class="grid g3 mt2">
+      <a class="linkcard" href="https://suno.com/" target="_blank" rel="noopener"><span class="ic">🎵</span>
+        <div><h4>Suno AI</h4><p>suno.com ・ AI 音樂生成器</p></div></a>
+      <a class="linkcard" href="https://www.capcut.com/zh-tw/" target="_blank" rel="noopener"><span class="ic">🎬</span>
+        <div><h4>CapCut 國際版</h4><p>有線上網頁版可直接操作</p></div></a>
+      <a class="linkcard" href="https://www.capcut.cn/" target="_blank" rel="noopener"><span class="ic">✂️</span>
+        <div><h4>剪映 中國版</h4><p>電腦版，簡體中文介面</p></div></a>
+      <a class="linkcard" href="https://chat.openai.com/" target="_blank" rel="noopener"><span class="ic">💬</span>
+        <div><h4>ChatGPT</h4><p>協作生成風格建議與歌詞、腳本</p></div></a>
+      <a class="linkcard" href="https://www.youtube.com/watch?v=VGAIFZOGdHE&t=202s" target="_blank" rel="noopener"><span class="ic">▶️</span>
+        <div><h4>補充教學影片</h4><p>剪映操作示範（YouTube）</p></div></a>
+      <a class="linkcard" href="https://www.youtube.com/@p3688905/videos" target="_blank" rel="noopener"><span class="ic">📺</span>
+        <div><h4>老師 YT 頻道</h4><p>@p3688905</p></div></a>
+    </div>
+
+    <div class="card mt2">
+      <h3>🧰 教材提到的其他工具</h3>
+      <div class="chips">
+        <span class="chip">DALL·E（圖像生成）</span><span class="chip">MidJourney（圖像生成）</span>
+        <span class="chip">Runway ML（場景動態化）</span><span class="chip">Kaiber（靜圖轉動畫）</span>
+        <span class="chip">ElevenLabs（TTS 旁白）</span><span class="chip">Amper Music（AI 背景音樂）</span>
+        <span class="chip">AIVA（AI 作曲）</span><span class="chip">ChatGPT（文本／腳本／歌詞）</span>
+      </div>
+    </div>
+
+    <div class="disclaimer reveal" style="margin-top:26px">
+      <span class="dic">📌</span>
+      <div>
+        <h4>教學說明</h4>
+        <p><b>本網頁內容為理論基礎，實際操作請以教師課堂授課狀況為主。</b></p>
+        <span class="sub">若頁面說明與教師當堂示範、或與各平台最新版本介面有出入，請一律以教師課堂授課內容為準。</span>
+      </div>
+    </div>
+
+    <div class="foot">
+      <div class="fdis">📌 本網頁內容為理論基礎，實際操作請以教師課堂授課狀況為主</div><br>
+      本互動學習網頁內容整理自教材《AI課程初探：生成式 AI 歌曲教學》與《AI課程初探：生成式 AI 影片剪輯》（2024/12/12）。<br>
+      僅供課堂教學使用 ・ Suno 與剪映介面皆為教學模擬，非官方產品 ・ 計費與下載額度以 Suno AI 官方最新公告為準。
+    </div>
+  </section>
+
+  </main>
+</div>
+
+<button id="toTop" title="回到頂部">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+</button>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.prototype.slice.call(r.querySelectorAll(s));
+const store={
+  get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v);}catch(e){return d;}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+};
+let toastTimer=null;
+function toast(msg){
+  const t=$('#toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+/* ---------- 主題 ---------- */
+const themeBtn=$('#themeBtn'),themeTxt=$('#themeTxt');
+function applyTheme(th){
+  document.documentElement.dataset.theme=th;
+  themeTxt.textContent = th==='dark' ? '淺色' : '深色';
+  store.set('ai-theme',th);
+}
+applyTheme(store.get('ai-theme','dark'));
+themeBtn.addEventListener('click',()=>applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'));
+
+/* ---------- Hero EQ ---------- */
+(function(){
+  const box=$('#heroEq');if(!box)return;
+  const n=window.innerWidth<680?22:40;
+  let html='';
+  for(let i=0;i<n;i++){
+    const h=18+Math.round(Math.random()*80);
+    html+='<i style="height:'+h+'%;animation-delay:'+(Math.random()*1.1).toFixed(2)+'s;animation-duration:'+(0.75+Math.random()*0.8).toFixed(2)+'s"></i>';
+  }
+  box.innerHTML=html;
+})();
+
+/* ---------- 捲動進度 ---------- */
+const bar=$('#progressBar'),toTop=$('#toTop');
+function onScroll(){
+  const h=document.documentElement;
+  const max=h.scrollHeight-h.clientHeight;
+  bar.style.width=(max>0?(h.scrollTop/max*100):0)+'%';
+  toTop.classList.toggle('show',h.scrollTop>600);
+}
+window.addEventListener('scroll',onScroll,{passive:true});onScroll();
+toTop.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+
+/* ---------- 導覽 ---------- */
+const sidebar=$('#sidebar');
+$('#burger').addEventListener('click',()=>sidebar.classList.toggle('open'));
+function go(id){
+  const el=document.getElementById(id);if(!el)return;
+  window.scrollTo({top:el.offsetTop-70,behavior:'smooth'});
+  sidebar.classList.remove('open');
+}
+$$('.navitem').forEach(a=>a.addEventListener('click',()=>go(a.dataset.target)));
+document.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b)go(b.dataset.go);});
+
+/* ---------- Reveal / count up / 閱讀進度 ---------- */
+const navItems=$$('.navitem');
+const sections=$$('section[data-nav]');
+const readSet=new Set(store.get('ai-read',[]));
+const ringArc=$('#ringArc'),readTxt=$('#readTxt');
+const CIRC=2*Math.PI*15.5;
+function updateRead(){
+  const total=sections.length;
+  ringArc.setAttribute('stroke-dasharray',CIRC.toFixed(1));
+  ringArc.setAttribute('stroke-dashoffset',(CIRC*(1-readSet.size/total)).toFixed(1));
+  readTxt.textContent=readSet.size+' / '+total+' 章節';
+  navItems.forEach(n=>n.classList.toggle('done',readSet.has(n.dataset.target)));
+  store.set('ai-read',Array.from(readSet));
+}
+const revealIO=new IntersectionObserver(es=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');revealIO.unobserve(e.target);}});
+},{threshold:.12});
+function bindReveal(){$$('.reveal:not(.in)').forEach(el=>revealIO.observe(el));}
+const secIO=new IntersectionObserver(es=>{
+  es.forEach(e=>{if(e.isIntersecting&&e.intersectionRatio>.25){
+    const id=e.target.id;if(!readSet.has(id)){readSet.add(id);updateRead();}}});
+},{threshold:[.25,.5,.75]});
+sections.forEach(s=>secIO.observe(s));
+const spyIO=new IntersectionObserver(es=>{
+  es.forEach(e=>{if(e.isIntersecting)navItems.forEach(n=>n.classList.toggle('active',n.dataset.target===e.target.id));});
+},{rootMargin:'-30% 0px -60% 0px'});
+sections.forEach(s=>spyIO.observe(s));
+const cntIO=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(!e.isIntersecting)return;
+    const el=e.target,target=+el.dataset.count;let cur=0;
+    const step=Math.max(1,Math.ceil(target/28));
+    const t=setInterval(()=>{cur+=step;if(cur>=target){cur=target;clearInterval(t);}el.textContent=cur;},32);
+    cntIO.unobserve(el);
+  });
+},{threshold:.6});
+$$('[data-count]').forEach(el=>cntIO.observe(el));
+updateRead();
+
+/* ---------- 手風琴 / Tabs ---------- */
+$$('[data-acc] .acc-h').forEach(h=>h.addEventListener('click',()=>h.parentElement.classList.toggle('open')));
+function bindTabs(sel){
+  $$(sel).forEach(box=>{
+    const tabs=$$('.tab',box);
+    tabs.forEach(t=>t.addEventListener('click',()=>{
+      tabs.forEach(x=>x.classList.remove('on'));t.classList.add('on');
+      $$('.tabpane',box.parentElement).forEach(p=>p.classList.toggle('on',p.id===t.dataset.pane));
+    }));
+  });
+}
+bindTabs('#labTabs');bindTabs('#asTabs');
+
+/* ---------- 六要素 ---------- */
+const ELEMS=[
+  {i:'🔑',t:'歌詞關鍵字',d:'描述歌詞內容的關鍵短語。',ex:'例：霓虹小巷、辣炒年糕、幸福的味道',c:'var(--acc2)'},
+  {i:'🎻',t:'樂器細節',d:'作曲中使用的特定樂器。',ex:'例：鋼琴、小提琴、鼓聲、薩克斯風',c:'var(--acc)'},
+  {i:'💗',t:'情緒',d:'音樂中傳達的情緒和感覺。',ex:'例：快樂、悲傷、激動、平靜',c:'var(--acc3)'},
+  {i:'🎼',t:'風格',d:'節奏類型和音樂風格的選擇。',ex:'例：流行樂 pop music、民謠 folk music、Kpop、電子',c:'var(--warn)'},
+  {i:'⏱️',t:'節奏',d:'音樂中的速度和節拍模式。',ex:'例：快、慢、適中、syncopated 切分節奏',c:'var(--ok)'},
+  {i:'🌐',t:'語言',d:'歌詞與演唱的語言規範。',ex:'例：中文、英文、日文、韓文',c:'#818cf8'}
+];
+$('#sixElems').innerHTML=ELEMS.map(e=>
+ '<div class="card reveal">'+
+   '<div style="display:flex;align-items:center;gap:10px">'+
+     '<span style="width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:18px;background:color-mix(in srgb,'+e.c+' 20%,transparent);border:1px solid color-mix(in srgb,'+e.c+' 40%,transparent)">'+e.i+'</span>'+
+     '<h3 style="margin:0">'+e.t+'</h3></div>'+
+   '<p style="margin-top:10px">'+e.d+'</p>'+
+   '<div class="note" style="margin-top:10px;font-size:12.5px">'+e.ex+'</div>'+
+ '</div>').join('');
+
+/* ---------- 額度計算 ---------- */
+const songNum=$('#songNum'),calcOut=$('#calcOut'),calcTip=$('#calcTip'),dlNum=$('#dlNum'),dlTip=$('#dlTip');
+function calc(){
+  let n=parseInt(songNum.value,10);if(isNaN(n)||n<1)n=1;
+  const credits=n*5, gens=Math.ceil(n/2), days=Math.ceil(credits/50);
+  calcOut.innerHTML=
+    '<div class="stat"><b>'+credits+'</b><span>需要 Credits</span></div>'+
+    '<div class="stat"><b>'+gens+'</b><span>生成次數</span></div>'+
+    '<div class="stat"><b>'+days+'</b><span>免費天數</span></div>';
+  calcTip.innerHTML = days<=1
+    ? '✅ 一天 50 credits（可生成 10 首 / 5 次）就夠了，今天就能完成！'
+    : '📅 免費版每天 50 credits，共需約 <b>'+days+'</b> 天。若要一次做完，可考慮 Pro / Premier 付費方案（且可商用）。';
+  let d=parseInt(dlNum.value,10);if(isNaN(d)||d<0)d=0;
+  if(d<=7){dlTip.className='note tip';
+    dlTip.innerHTML='⬇ 需下載 <b>'+d+'</b> 首 MP3，佔用終生額度 <b>'+d+' / 7</b> 次，還剩 <b>'+(7-d)+'</b> 次可用。';}
+  else{dlTip.className='note bad';
+    dlTip.innerHTML='⛔ 需下載 <b>'+d+'</b> 首 MP3，<b>已超過免費版終生 7 次的上限</b>（超出 '+(d-7)+' 次）。必須升級付費方案或減少下載數量。';}
+}
+songNum.addEventListener('input',calc);dlNum.addEventListener('input',calc);calc();
+
+/* ---------- 2026 下載額度 ---------- */
+const DL_LIMIT=7;
+let dlUsed=Math.min(DL_LIMIT,Math.max(0,parseInt(store.get('ai-dl-used',0),10)||0));
+const dlSlots=$('#dlSlots'),dlUsedEl=$('#dlUsed'),dlLeftEl=$('#dlLeft');
+function renderDl(){
+  let h='';
+  for(let i=0;i<DL_LIMIT;i++) h+='<i class="'+(i<dlUsed?'used':'')+'">'+(i<dlUsed?'✓':(i+1))+'</i>';
+  dlSlots.innerHTML=h;dlUsedEl.textContent=dlUsed;dlLeftEl.textContent=(DL_LIMIT-dlUsed);
+  dlLeftEl.style.color=(DL_LIMIT-dlUsed)<=2?'var(--bad)':'var(--warn)';
+  $('#dlUse').disabled=dlUsed>=DL_LIMIT;
+  $('#dlUse').style.opacity=dlUsed>=DL_LIMIT?.45:1;
+  store.set('ai-dl-used',dlUsed);
+}
+$('#dlUse').addEventListener('click',()=>{
+  if(dlUsed>=DL_LIMIT){toast('⛔ 終生 7 次下載額度已用完，需升級付費方案');return;}
+  dlUsed++;renderDl();
+  toast(dlUsed>=DL_LIMIT?'⛔ 7 次額度已用完！此免費帳號無法再下載 MP3':'⬇ 已模擬下載 1 次，剩餘 '+(DL_LIMIT-dlUsed)+' 次');
+});
+$('#dlReset').addEventListener('click',()=>{dlUsed=0;renderDl();toast('已重設為 7 次額度');});
+renderDl();
+
+/* ---------- Suno 模擬器 ---------- */
+const STYLES=['Kpop','pop music','folk music','電子音樂 EDM','future bass','搖滾 rock','R&B','jazz 爵士','classical 古典','lo-fi','hip hop','中國風','鋼琴抒情','cinematic 配樂'];
+$('#styleChips').innerHTML=STYLES.map(s=>'<button class="chip" data-style="'+s+'">'+s+'</button>').join('');
+$('#styleChips').addEventListener('click',e=>{
+  const b=e.target.closest('[data-style]');if(!b)return;
+  const inp=$('#cStyle');
+  const arr=inp.value.split(/[、,，]\s*/).filter(x=>x&&x!==b.dataset.style);
+  arr.push(b.dataset.style);inp.value=arr.join(', ');inp.dispatchEvent(new Event('input'));
+});
+const LYRICS={
+ lyric1:'[Verse 1]\n昏暗的廚房，蒸汽模糊了窗\n娘家的飯桌，今年又少了我一方\n\n[Chorus]\n佛跳牆的味道不會改變\n但我的人生，可以自己決定方向\n\n[Outro]\n媽，今年我回家了',
+ lyric2:'[Verse 1]\n霓虹小巷香氣四溢\n辣炒年糕美味無比\n\n[Chorus]\n一口咬下幸福的味道\n心情瞬間衝上雲霄\n\n[Verse 2]\nDJ 節拍帶著我跳舞\n夜店的燈光像星圖'
+};
+function bindCount(inp,out){const el=$('#'+inp),o=$('#'+out);const f=()=>{o.textContent=el.value.length;};el.addEventListener('input',f);f();}
+['promptDesc|c1','cLyrics|c2','cStyle|c3','cExclude|c4','cTitle|c5'].forEach(p=>{const a=p.split('|');bindCount(a[0],a[1]);});
+$$('#modeSeg button').forEach(b=>b.addEventListener('click',()=>{
+  $$('#modeSeg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+  const c=b.dataset.mode==='custom';
+  $('#panePrompt').style.display=c?'none':'block';$('#paneCustom').style.display=c?'block':'none';
+}));
+$$('#verSeg button').forEach(b=>b.addEventListener('click',()=>{
+  $$('#verSeg button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+}));
+$('#uploadFake').addEventListener('click',()=>toast('📎 模擬功能：Upload Audio 可上傳音訊進行翻唱／延伸'));
+document.addEventListener('click',e=>{
+  const f=e.target.closest('[data-fill]');if(!f)return;
+  $('#cLyrics').value=LYRICS[f.dataset.fill];$('#cLyrics').dispatchEvent(new Event('input'));toast('已填入歌詞範例');
+});
+$('#surprise').addEventListener('click',()=>{
+  const topic=$('#cTitle').value.trim()||'未命名的歌';
+  $('#cLyrics').value='[Verse 1]\n（Suno 協作生成）關於「'+topic+'」的第一段敘事\n把日常的細節寫成畫面\n\n[Pre-Chorus]\n心跳慢慢靠近\n\n[Chorus]\n這是屬於我們的旋律\n'+topic+'\n在每個夜裡反覆響起\n\n[Bridge]\n如果時間可以停下\n\n[Outro]\n讓這首歌替我說話';
+  $('#cLyrics').dispatchEvent(new Event('input'));toast('✨ Surprise Me / Write with Suno：已協作生成歌詞');
+});
+let credits=50;const creditNum=$('#creditNum');
+$('#creditDate').textContent=new Date().toLocaleDateString('zh-TW');
+function waveBars(seed){
+  let h='';const rnd=(s=>()=>{s=(s*9301+49297)%233280;return s/233280;})(seed);
+  for(let i=0;i<46;i++){const pct=20+rnd()*80;h+='<i style="height:'+pct.toFixed(0)+'%;animation-delay:'+(i*0.035).toFixed(2)+'s"></i>';}
+  return h;
+}
+function renderSongs(meta){
+  const area=$('#resultArea');
+  const names=meta.title?[meta.title,meta.title+' (Alt Ver.)']:['未命名作品 A','未命名作品 B'];
+  area.innerHTML=names.map((nm,i)=>
+   '<div class="song">'+
+     '<div class="cover"><b>'+(i+1)+'</b></div>'+
+     '<button class="playb"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>'+
+     '<div style="flex:1;min-width:0">'+
+       '<div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+nm+'</div>'+
+       '<div style="font-size:11.5px;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+
+         (meta.style||'未指定風格')+' ・ v'+($('#verSeg .on')?$('#verSeg .on').textContent.replace('v',''):'4.5')+' ・ '+(meta.ins?'Instrumental 純音樂':'人聲演唱')+'</div>'+
+       '<div class="wave">'+waveBars(1234+i*77)+'</div></div>'+
+     '<div style="text-align:right;font-size:11px;color:var(--tx3)">0:00 / 2:4'+(i+3)+
+       '<div style="margin-top:6px"><button class="btn ghost sm dl" style="padding:5px 11px">⬇ 下載 MP3</button></div></div>'+
+   '</div>').join('');
+  $$('.playb',area).forEach(b=>b.addEventListener('click',()=>{
+    const s=b.closest('.song');const on=s.classList.contains('playing');
+    $$('.song',area).forEach(x=>{x.classList.remove('playing');$('.playb',x).innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';});
+    if(!on){s.classList.add('playing');b.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>';}
+  }));
+  $$('.dl',area).forEach(b=>b.addEventListener('click',()=>{
+    if(dlUsed<DL_LIMIT){dlUsed++;renderDl();toast('⬇ 模擬下載：已用 '+dlUsed+' / 7 次終生額度');}
+    else toast('⛔ 免費版終生 7 次下載額度已用完');
+  }));
+}
+$('#createBtn').addEventListener('click',()=>{
+  const isCustom=$('#paneCustom').style.display!=='none';
+  const desc=isCustom?($('#cLyrics').value+$('#cStyle').value):$('#promptDesc').value;
+  if(!desc.trim()){toast('⚠️ 請先輸入音樂描述或歌詞');return;}
+  if(credits<10){toast('🪙 Credits 不足（每天 50，一次生成需 10）');return;}
+  const btn=$('#createBtn');btn.disabled=true;
+  $('#resultArea').innerHTML='<div class="loading"><i></i><i></i><i></i>&nbsp;Suno 正在生成兩個版本（相同歌詞・不同旋律）…</div>';
+  setTimeout(()=>{
+    credits-=10;creditNum.textContent=credits;
+    renderSongs({title:isCustom?$('#cTitle').value.trim():'',
+      style:isCustom?$('#cStyle').value.trim():($('#promptDesc').value.trim().slice(0,46)),
+      ins:isCustom?$('#ins2').checked:$('#ins1').checked});
+    btn.disabled=false;
+    toast('🎉 已生成 2 首 ・ 消耗 10 credits（剩 '+credits+'）');
+  },1900);
+});
+$('#clearBtn').addEventListener('click',()=>{
+  ['promptDesc','cLyrics','cStyle','cExclude','cTitle'].forEach(id=>{const e=$('#'+id);if(e){e.value='';e.dispatchEvent(new Event('input'));}});
+  $('#resultArea').innerHTML='';toast('已清除欄位');
+});
+
+/* ---------- Prompt 實驗室 ---------- */
+const LAB={
+  lang:{multi:false,opts:[['中文','Chinese'],['英文','English'],['日文','Japanese'],['韓文','Korean']]},
+  mood:{multi:false,opts:[['快樂','happy'],['悲傷','sad'],['激動','emotional'],['平靜','calm'],['溫暖','warm'],['勵志','uplifting'],['懷舊','nostalgic'],['神秘','mysterious']]},
+  style:{multi:false,opts:[['流行樂','pop music'],['民謠','folk music'],['Kpop','K-pop'],['電子音樂','EDM electronic'],['Future Bass','future bass'],['搖滾','rock'],['R&B','R&B'],['爵士','jazz'],['古典','classical'],['Lo-fi','lo-fi'],['嘻哈','hip hop'],['中國風','Chinese traditional style'],['電影配樂','cinematic score']]},
+  tempo:{multi:false,opts:[['快','fast tempo, 128 BPM'],['慢','slow tempo, 70 BPM'],['適中','medium tempo, 96 BPM'],['切分節奏','syncopated rhythm']]},
+  inst:{multi:true,opts:[['鋼琴','piano'],['小提琴','violin'],['鼓聲','drums'],['薩克斯風','saxophone'],['吉他','acoustic guitar'],['古箏','guzheng'],['琵琶','pipa'],['合成器','synth'],['弦樂','strings'],['笛子','bamboo flute']]},
+  topic:{multi:false,opts:[['雨天遇見愛情','finding love on a rainy day'],['除夕夜的團圓','Lunar New Year family reunion'],['家鄉的味道','the taste of hometown'],['深夜的城市','a city at midnight'],['畢業與告別','graduation and farewell'],['一碗蛋炒飯','a bowl of fried rice'],['外婆的廚房','grandma\'s kitchen']]}
+};
+const state={lang:null,mood:null,style:null,tempo:null,inst:[],topic:null};
+Object.keys(LAB).forEach(g=>{
+  $('[data-group="'+g+'"]').innerHTML=LAB[g].opts.map((o,i)=>'<button class="pill" data-g="'+g+'" data-i="'+i+'">'+o[0]+'</button>').join('');
+});
+document.addEventListener('click',e=>{
+  const p=e.target.closest('.pill');if(!p)return;
+  const g=p.dataset.g,i=+p.dataset.i;
+  if(LAB[g].multi){const pos=state[g].indexOf(i);if(pos>=0)state[g].splice(pos,1);else state[g].push(i);}
+  else{state[g]=(state[g]===i)?null:i;}
+  $$('[data-g="'+g+'"]').forEach(x=>x.classList.remove('on'));
+  if(LAB[g].multi)state[g].forEach(k=>{const el=$('[data-g="'+g+'"][data-i="'+k+'"]');if(el)el.classList.add('on');});
+  else if(state[g]!==null)p.classList.add('on');
+});
+function pick(g){return state[g]===null?null:LAB[g].opts[state[g]];}
+function buildLab(){
+  const customTopic=$('#topicInput').value.trim();
+  const L=pick('lang'),M=pick('mood'),S=pick('style'),T=pick('tempo'),TP=pick('topic');
+  const insts=state.inst.map(i=>LAB.inst.opts[i]);
+  const zhTopic=customTopic||(TP?TP[0]:'一段關於生活與情感的故事');
+  const enTopic=(TP&&!customTopic)?TP[1]:'a story about life and feelings';
+  const zhStyle=S?S[0]:'流行樂',enStyle=S?S[1]:'pop music';
+  const zhMood=M?M[0]:'情緒豐富',enMood=M?M[1]:'emotional';
+  const zhTempo=T?T[0]:'適中',enTempo=T?T[1]:'medium tempo';
+  const zhInst=insts.length?insts.map(x=>x[0]).join('、'):'鋼琴與鼓';
+  const enInst=insts.length?insts.map(x=>x[1]).join(', '):'piano and drums';
+  const zhLang=L?L[0]:'中文',enLang=L?L[1]:'Chinese';
+  const p1='一首'+zhTempo+'的'+zhLang+zhStyle+'歌曲，主題是'+zhTopic+'。整體情緒'+zhMood+'，以'+zhInst+
+    '編曲為主，人聲真摯，副歌旋律強烈易記，段落安排為前奏—主歌—導歌—副歌—橋段—尾奏。';
+  const p3='a '+enTempo+' '+enLang+' '+enStyle+' song about '+enTopic+', '+enMood+' mood, featuring '+enInst+
+    ', sincere vocals, catchy chorus, full song structure with intro, verse, pre-chorus, chorus, bridge and outro.';
+  const title=(customTopic||zhTopic).slice(0,14);
+  const style=[enStyle,enTempo,enMood,enLang+' vocals',enInst].join(', ');
+  const lyric='[Verse 1]\n'+zhTopic+'，在心裡慢慢發酵\n'+zhInst.split('、')[0]+'的聲音，像那年的風\n\n[Pre-Chorus]\n如果還來得及，我想說出口\n\n[Chorus]\n'+
+    zhTopic+'\n'+zhMood+'的旋律繞著我走\n就算世界喧囂，也別放開手\n\n[Bridge]\n'+zhInst+'一起呼吸\n\n[Outro]\n把這首歌，留給未來的我';
+  const exclude='heavy metal, distortion, screaming vocals, low quality, muddy mix';
+  $('#out1').textContent=p1;$('#out2a').textContent=title;$('#out2b').textContent=style;
+  $('#out2c').textContent=lyric;$('#out2d').textContent=exclude;$('#out3').textContent=p3;
+  return {p1:p1,p3:p3,title:title,style:style,lyric:lyric,exclude:exclude};
+}
+let lastLab=null;
+$('#labGen').addEventListener('click',()=>{lastLab=buildLab();toast('⚡ Prompt 已生成，可直接複製');});
+$('#labRandom').addEventListener('click',()=>{
+  Object.keys(LAB).forEach(g=>{
+    if(g==='inst'){state.inst=[];const n=2+Math.floor(Math.random()*2);
+      while(state.inst.length<n){const k=Math.floor(Math.random()*LAB.inst.opts.length);if(state.inst.indexOf(k)<0)state.inst.push(k);}}
+    else state[g]=Math.random()<0.88?Math.floor(Math.random()*LAB[g].opts.length):null;
+    $$('[data-g="'+g+'"]').forEach(x=>x.classList.remove('on'));
+  });
+  Object.keys(LAB).forEach(g=>{
+    if(g==='inst')state.inst.forEach(k=>{const el=$('[data-g="inst"][data-i="'+k+'"]');if(el)el.classList.add('on');});
+    else if(state[g]!==null){const el=$('[data-g="'+g+'"][data-i="'+state[g]+'"]');if(el)el.classList.add('on');}
+  });
+  $('#topicInput').value='';lastLab=buildLab();toast('🎲 已隨機組合');
+});
+$('#labReset').addEventListener('click',()=>{
+  Object.keys(LAB).forEach(g=>{state[g]=LAB[g].multi?[]:null;});
+  $$('.pill').forEach(p=>p.classList.remove('on'));$('#topicInput').value='';toast('已重設');
+});
+$('#applyToMock').addEventListener('click',()=>{
+  const d=lastLab||buildLab();
+  $$('#modeSeg button').forEach(x=>x.classList.remove('on'));
+  $('#modeSeg button[data-mode="custom"]').classList.add('on');
+  $('#panePrompt').style.display='none';$('#paneCustom').style.display='block';
+  $('#cTitle').value=d.title;$('#cStyle').value=d.style;$('#cLyrics').value=d.lyric;$('#cExclude').value=d.exclude;$('#promptDesc').value=d.p1;
+  ['cTitle','cStyle','cLyrics','cExclude','promptDesc'].forEach(id=>$('#'+id).dispatchEvent(new Event('input')));
+  go('modes');toast('📋 已填入 Suno 模擬器');
+});
+$('#demoFill').addEventListener('click',()=>{
+  $$('#modeSeg button').forEach(x=>x.classList.remove('on'));
+  $('#modeSeg button[data-mode="custom"]').classList.add('on');
+  $('#panePrompt').style.display='none';$('#paneCustom').style.display='block';
+  $('#cTitle').value='蛋炒飯';
+  $('#cStyle').value='tragic narrative folk, piano and strings, Chinese style, slow tempo, emotional male vocal';
+  $('#cExclude').value='edm, autotune, heavy metal';
+  $('#cLyrics').value=$('#lyricFull').innerText;
+  ['cTitle','cStyle','cLyrics','cExclude'].forEach(id=>$('#'+id).dispatchEvent(new Event('input')));
+  go('modes');toast('🪄 已填入《蛋炒飯》範例');
+});
+buildLab();
+
+/* ---------- 複製 ---------- */
+$$('.copybtn').forEach(b=>b.dataset.label=b.textContent);
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-copy]');if(!b)return;
+  const el=document.getElementById(b.dataset.copy);if(!el)return;
+  const txt=el.innerText;
+  const done=()=>{b.classList.add('done');b.textContent='已複製 ✓';setTimeout(()=>{b.classList.remove('done');b.textContent=b.dataset.label||'複製';},1700);};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(done).catch(()=>fallback(txt,done));
+  else fallback(txt,done);
+});
+function fallback(txt,cb){
+  const ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';
+  document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');cb();}catch(err){toast('複製失敗，請手動選取');}
+  document.body.removeChild(ta);
+}
+
+/* ---------- 歌曲結構 ---------- */
+const STRUCT=[
+  {n:'前奏',e:'Intro',w:8,c:'#22d3ee',d:'歌曲的開場。用樂器建立氛圍與調性，讓聽眾在幾秒內進入情緒，通常沒有人聲或只有少量哼唱。'},
+  {n:'主歌',e:'Verse',w:14,c:'#818cf8',d:'敘事主體。鋪陳故事、場景與細節，旋律較平穩，每段歌詞不同但旋律相近（Verse 1 / Verse 2）。'},
+  {n:'導歌',e:'Pre-Chorus',w:8,c:'#a855f7',d:'副歌前的情緒爬坡。用和聲與節奏變化累積張力，讓聽眾預期副歌即將到來。'},
+  {n:'副歌',e:'Chorus',w:14,c:'#f472b6',d:'全曲最強烈、最容易被記住的段落，通常重複出現，承載核心訊息與歌名，是歌曲的記憶點。'},
+  {n:'間奏',e:'Inter',w:6,c:'#38bdf8',d:'段落之間的器樂銜接，讓聽覺有喘息，也用來轉換情緒或調性。'},
+  {n:'樂器獨奏',e:'Instrumental Solo',w:9,c:'#f59e0b',d:'吉他、鋼琴、小提琴或薩克斯風等樂器的 Solo 段落，用旋律代替語言推高情緒。'},
+  {n:'橋段',e:'Bridge',w:10,c:'#34d399',d:'打破前面重複感的轉折段落。常換和聲、換視角或給出答案，為最後一次副歌做準備。'},
+  {n:'尾奏',e:'Outro',w:9,c:'#94a3b8',d:'收尾。可以用漸弱、單一樂器或重複副歌尾句結束，留給聽眾回味與深思的空間。'}
+];
+const sbar=$('#structBar');
+sbar.innerHTML=STRUCT.map((s,i)=>'<div class="segblock" data-i="'+i+'" style="flex:'+s.w+';background:linear-gradient(160deg,'+s.c+',color-mix(in srgb,'+s.c+' 45%,#000))"><span>'+s.n+'</span></div>').join('');
+function showStruct(i){
+  const s=STRUCT[i];
+  $$('.segblock',sbar).forEach((b,k)=>b.classList.toggle('on',k===i));
+  $('#structInfo').innerHTML=
+    '<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">'+
+      '<span class="tag" style="background:'+s.c+';color:#fff;border-color:transparent">'+s.e+'</span>'+
+      '<h3 style="margin:0">'+s.n+' <span style="color:var(--tx3);font-weight:500;font-size:13px">'+s.e+'</span></h3></div>'+
+    '<p style="margin-top:10px">'+s.d+'</p>'+
+    '<div class="note tip" style="margin-top:12px">在 Suno 歌詞欄寫成 <kbd>['+s.e+']</kbd>，AI 就會依段落配置演唱。</div>';
+}
+sbar.addEventListener('click',e=>{const b=e.target.closest('.segblock');if(b)showStruct(+b.dataset.i);});
+showStruct(3);
+let structTimer=null;
+$('#structPlay').addEventListener('click',()=>{
+  clearInterval(structTimer);let i=0;
+  const tick=()=>{showStruct(i);const b=$$('.segblock',sbar)[i];b.classList.remove('play');void b.offsetWidth;b.classList.add('play');
+    i++;if(i>=STRUCT.length){clearInterval(structTimer);setTimeout(()=>toast('🎵 結構播放完畢：這就是一首完整流行歌的配置'),400);}};
+  tick();structTimer=setInterval(tick,1150);
+});
+$('#structStop').addEventListener('click',()=>{clearInterval(structTimer);toast('已停止');});
+
+/* ---------- ChatGPT 流程卡 ---------- */
+const FLOW=[
+  {n:'01',t:'構思題材',d:'先想清楚要寫什麼：人物、場景、衝突與情感。',i:'💡'},
+  {n:'02',t:'請 AI 推薦風格',d:'提問時一併要求「推薦適合的音樂風格」，得到可直接貼入 Style 的關鍵字。',i:'🎼'},
+  {n:'03',t:'請 AI 寫歌詞',d:'追問「請幫我寫歌詞」，取得含 Verse／Chorus／Bridge 的完整結構。',i:'✍️'},
+  {n:'04',t:'貼進 Suno 生成',d:'Custom 模式填入歌詞、風格、歌名 → Create → 聆聽兩版本 → 下載。',i:'🚀'}
+];
+$('#flowCards').innerHTML=FLOW.map(f=>
+ '<div class="card reveal" style="position:relative;overflow:hidden">'+
+   '<div style="position:absolute;right:-8px;top:-16px;font-family:var(--f-serif);font-size:62px;font-weight:700;opacity:.10">'+f.n+'</div>'+
+   '<div style="font-size:24px">'+f.i+'</div><h3 style="margin-top:8px">'+f.t+'</h3><p style="font-size:13.5px">'+f.d+'</p></div>').join('');
+
+/* ---------- 腳本分鏡 ---------- */
+const SHOTS=[
+ {t:'開場 — 傷感的序曲',time:'0:00 – 0:20',w:20,c:'#22d3ee',
+  scene:'昏暗的廚房，一鍋冒著蒸氣的佛跳牆被放到桌上。',
+  action:'女主角「小芸」一手撐著腰，一手攪拌鍋裡的湯，滿臉疲憊。她看向手機，螢幕上是未接來電與娘家人的合照。她抓起手機，給老公「阿強」發訊息：「回來吃飯前可以幫我買瓶酒嗎？」',
+  line:'（心聲旁白）「娘家的飯桌今年又少了我，我連過年的意義都忘了。」',
+  face:'她皺眉，眼中帶著不甘。',music:'Suno AI 生成的歌曲（歌名）'},
+ {t:'婆媳矛盾的升級',time:'0:20 – 1:00',w:40,c:'#a855f7',
+  scene:'小芸拿著鍋勺舀起佛跳牆的湯，試味道。桌上擺滿準備好的年菜。',
+  action:'小芸一臉厭煩，將勺子狠狠丟進鍋裡。電話響起，婆婆打來。',
+  line:'（小聲嘟囔）「這根本就不是我想要煮的東西……」／婆婆：「小芸啊，今年佛跳牆的味道別太淡，阿強說你手藝越來越差了。」／小芸：「好的，媽。」',
+  face:'咬牙切齒，深吸一口氣後擠出笑容。',music:'同一首 AI 歌曲（主歌段落，情緒壓抑）'},
+ {t:'離婚的決心',time:'1:00 – 2:00',w:60,c:'#f472b6',
+  scene:'阿強回家，疲憊地坐下吃飯，沒注意到小芸的神情。',
+  action:'小芸冷冷地看著他，突然放下筷子，打開抽屜拿出一份離婚協議書。',
+  line:'阿強：「妳煮得不錯啊，媽很期待妳手藝的進步。」／小芸：「明天簽吧，我受夠了。」／阿強：「妳發什麼神經？」',
+  face:'阿強錯愕，抬頭瞪著她。',music:'同一首 AI 歌曲（副歌／橋段，情緒爆發）'},
+ {t:'結尾 — 思考與重生',time:'2:00 – 3:00',w:60,c:'#34d399',
+  scene:'畫面切換到清晨，小芸站在陽台上，拿著一杯熱茶，身後是打包好的行李。',
+  action:'她深呼吸，看著升起的太陽，露出輕鬆的笑容，對手機發出一條簡訊：「媽，今年我回家了。」',
+  line:'（心聲旁白）「佛跳牆的味道不會改變，但我的人生可以。」',
+  face:'放鬆、釋然的微笑。',music:'同一首 AI 歌曲（尾奏，漸弱收尾）'}
+];
+$('#shots').innerHTML=SHOTS.map((s,i)=>
+ '<div class="shot'+(i===0?' open':'')+'">'+
+   '<div class="shot-h"><span class="shot-no">'+(i+1)+'</span><h4>'+s.t+'</h4><span class="shot-time">'+s.time+'</span>'+
+     '<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="transition:.3s"><path d="M6 9l6 6 6-6"/></svg></div>'+
+   '<div class="shot-b"><div class="shot-b-in">'+
+     '<div class="kv"><b>場景</b><p>'+s.scene+'</p></div><div class="kv"><b>動作</b><p>'+s.action+'</p></div>'+
+     '<div class="kv"><b>語言</b><p>'+s.line+'</p></div><div class="kv"><b>神態</b><p>'+s.face+'</p></div>'+
+     '<div class="kv"><b>配樂</b><p>'+s.music+'</p></div></div></div></div>').join('');
+$('#shotTimeline').innerHTML=SHOTS.map(s=>'<i style="flex:'+s.w+';background:'+s.c+'"></i>').join('');
+$$('.shot .shot-h').forEach(h=>h.addEventListener('click',()=>{
+  const s=h.parentElement,was=s.classList.contains('open');
+  $$('.shot').forEach(x=>{x.classList.remove('open');$('.chev',x).style.transform='';});
+  if(!was){s.classList.add('open');$('.chev',s).style.transform='rotate(180deg)';}
+}));
+const firstChev=$('#shots .shot.open .chev');if(firstChev)firstChev.style.transform='rotate(180deg)';
+
+/* ---------- 飲食文學 ---------- */
+const DIET=[
+ {t:'文學元素',i:'📖',c:'var(--acc2)',items:[
+   ['文學文本','原創文章或經典作品的段落，例如村上春樹的美食描寫、川端康成的餐桌場景，提供細膩描寫作為 AI 文本生成（如 ChatGPT）或旁白生成的基礎。'],
+   ['詩句或名言','飲食與人生哲理的關聯，例如：「食物是記憶的載體」。'],
+   ['故事架構','描述某道料理背後的故事，如廚師的情感、食材的來源或用餐的文化意涵。']]},
+ {t:'視覺元素',i:'🎨',c:'var(--acc)',items:[
+   ['背景生成','透過 DALL·E 或 MidJourney，創建有文學氛圍的餐廳、廚房或戶外場景。'],
+   ['風格範例','江戶時代浮世繪風的茶屋和料理；法式浪漫主義畫風的餐桌與紅酒。'],
+   ['料理畫面','AI 生成精緻料理圖像，搭配文學細節描述，例如一碗飄散蒸汽的拉麵、炭火燒烤的金黃肉串。'],
+   ['角色設定','設計富有故事感的角色：孤獨的美食家、廚藝大師、尋找家鄉味道的旅人，並添加特徵與表情以增強敘事。']]},
+ {t:'動態與動畫',i:'🌀',c:'var(--warn)',badge:'不強制',items:[
+   ['場景動態化','工具：Runway ML、Kaiber。讓靜態圖像（如晚餐場景或廚師切菜）變成具有動態效果的短動畫。'],
+   ['烹飪過程動畫','利用 AI 模擬刀工、火焰、翻炒等動作，帶入製作過程的細節。'],
+   ['轉場效果','使用濾鏡模擬文學的夢幻氛圍，例如書頁翻動變成料理畫面。']]},
+ {t:'音效與語音',i:'🎧',c:'var(--acc3)',badge:'要放歌',items:[
+   ['環境音效','生成廚房裡的切菜聲、煮水沸騰聲，或餐廳中的輕聲交談。'],
+   ['旁白','使用 TTS 工具（如 ElevenLabs）生成溫暖或深情的聲音，朗讀文學段落。（不用給沒關係）'],
+   ['背景音樂','AI 生成符合主題的音樂：和風箏樂搭配日式料理；法式鋼琴曲描繪浪漫餐廳；鄉村吉他旋律適合家常菜場景。（一定要給）']]}
+];
+$('#dietCards').innerHTML=DIET.map(d=>
+ '<div class="card reveal"><div style="display:flex;align-items:center;gap:10px">'+
+   '<span style="font-size:22px">'+d.i+'</span><h3 style="margin:0">'+d.t+'</h3>'+
+   (d.badge?'<span class="tag '+(d.badge==='要放歌'?'c':'d')+'">'+d.badge+'</span>':'')+'</div>'+
+   d.items.map(x=>'<div style="margin-top:12px"><h4 style="color:'+d.c+'">'+x[0]+'</h4><p style="font-size:13.5px">'+x[1]+'</p></div>').join('')+
+ '</div>').join('');
+
+/* =========================================================
+   ★ 剪映介面 + 時間軸 模擬器（軌道由上而下：字幕 → 影片 → 音訊）
+   ========================================================= */
+(function(){
+  const PAL=['#22d3ee','#a855f7','#f472b6','#f59e0b','#34d399','#818cf8','#38bdf8','#fb7185','#a3e635','#c084fc','#f97316','#2dd4bf'];
+  let uid=0;
+  const mk=o=>Object.assign({id:'c'+(++uid)},o);
+  let clips={text:[],video:[],audio:[]};
+  let TL=14, selId=null, curTime=0, playing=false, timer=null;
+
+  const ROWS=[
+    {k:'text', label:'字幕軌', pos:'① 最上方'},
+    {k:'video',label:'影片軌', pos:'② 中間'},
+    {k:'audio',label:'音訊軌', pos:'③ 最下方'}
+  ];
+
+  const RAIL=[
+    {k:'media',ic:'🖼️',n:'媒體'},
+    {k:'audio',ic:'🎵',n:'音訊'},
+    {k:'text',ic:'Ｔ',n:'文字'},
+    {k:'fx',ic:'✨',n:'特效'},
+    {k:'trans',ic:'🔀',n:'轉場'},
+    {k:'filter',ic:'🎨',n:'濾鏡'}
+  ];
+  const MEDIA={
+    media:{title:'媒體 Media ・ 十張圖片跟歌曲 → 影片軌',items:[
+      {n:'圖片 1 廚房',e:'🍲',sub:'AI 生成',k:'img',dur:2},
+      {n:'圖片 2 試味道',e:'🥄',sub:'AI 生成',k:'img',dur:2},
+      {n:'圖片 3 年菜桌',e:'🥘',sub:'AI 生成',k:'img',dur:2},
+      {n:'圖片 4 手機訊息',e:'📱',sub:'AI 生成',k:'img',dur:2},
+      {n:'圖片 5 離婚協議',e:'📄',sub:'AI 生成',k:'img',dur:2},
+      {n:'圖片 6 清晨陽台',e:'🌅',sub:'AI 生成',k:'img',dur:2},
+      {n:'圖片 7 熱茶',e:'🍵',sub:'AI 生成',k:'img',dur:2},
+      {n:'圖片 8 行李',e:'🧳',sub:'AI 生成',k:'img',dur:2},
+      {n:'圖片 9 燈籠',e:'🏮',sub:'AI 生成',k:'img',dur:2},
+      {n:'圖片 10 紅包',e:'🧧',sub:'AI 生成',k:'img',dur:2},
+      {n:'轉場動畫',e:'✨',sub:'動畫・只能縮減',k:'anim',dur:2},
+      {n:'烹飪過程動畫',e:'🔥',sub:'動畫・只能縮減',k:'anim',dur:2}
+    ]},
+    audio:{title:'音訊 Audio ・ 加入最下方音訊軌',items:[
+      {n:'♪ AI 歌曲（Suno）',e:'🎵',sub:'10 秒 ・ 可拉長',k:'audio',dur:10},
+      {n:'切菜聲',e:'🔪',sub:'環境音效',k:'audio',dur:3},
+      {n:'煮水沸騰聲',e:'💧',sub:'環境音效',k:'audio',dur:3},
+      {n:'餐廳輕聲交談',e:'🗣️',sub:'環境音效',k:'audio',dur:4}
+    ]},
+    text:{title:'文字 Text ・ 加入最上方字幕軌',items:[
+      {n:'自動歌詞 Auto lyrics',e:'🅣',sub:'中文歌請選 Chinese',k:'lyrics'},
+      {n:'預設文字',e:'Ｔ',sub:'點兩下即可編輯',k:'text',dur:3},
+      {n:'繁體歌詞文字檔',e:'📄',sub:'校正時複製貼上',k:'text',dur:3}
+    ]},
+    fx:{title:'特效 Effects（不強制）',items:[
+      {n:'光暈',e:'🌟',sub:'後製素材',k:'info',msg:'✨ 光暈屬於「後製素材（不強制）」，用來強化氛圍，不會佔用時間軸軌道。'},
+      {n:'模糊',e:'🌫️',sub:'後製素材',k:'info',msg:'🌫️ 模糊可用在回憶或轉折段落，屬於不強制的後製效果。'},
+      {n:'淡入淡出',e:'🌗',sub:'後製素材',k:'info',msg:'🌗 淡入淡出是最常用的過渡，適合放在開場與結尾。'}
+    ]},
+    trans:{title:'轉場 Transitions（不強制）',items:[
+      {n:'書頁翻動',e:'📖',sub:'飲食文學氛圍',k:'info',msg:'📖 書頁翻動變成料理畫面，可模擬文學的夢幻氛圍。'},
+      {n:'推拉',e:'↔️',sub:'常用',k:'info',msg:'↔️ 推拉轉場適合場景切換，例如廚房 → 陽台。'},
+      {n:'疊化',e:'🔁',sub:'常用',k:'info',msg:'🔁 疊化讓兩段畫面柔和銜接，情緒不會斷掉。'}
+    ]},
+    filter:{title:'濾鏡 Filters（不強制）',items:[
+      {n:'暖色調',e:'🟠',sub:'年菜／團圓',k:'info',msg:'🟠 暖色調適合除夕、年菜等團圓場景。'},
+      {n:'冷色調',e:'🔵',sub:'衝突／清晨',k:'info',msg:'🔵 冷色調適合衝突場面或清晨重生的畫面。'},
+      {n:'浮世繪風',e:'🎴',sub:'飲食文學',k:'info',msg:'🎴 江戶時代浮世繪風的茶屋與料理，是飲食文學影片的常用風格。'}
+    ]}
+  };
+  let curTool='media';
+
+  const HS=[
+    {n:1,t:'專案名稱',d:'匯出前先把專案名稱改成影片名稱，這樣匯出時就不用另外取檔名。',sel:'#zoneTop'},
+    {n:2,t:'左側工具列',d:'媒體 Media／音訊 Audio／文字 Text／特效 Effects／轉場 Transitions／濾鏡 Filters。',sel:'#edRail'},
+    {n:3,t:'素材區',d:'把影片所需素材（十張圖片跟歌曲）複製到這裡，再拖曳至時間軸。',sel:'#edMedia'},
+    {n:4,t:'預覽播放器',d:'最上方橘色白字部分即為字幕；按三角形播放可一邊預覽一邊檢查字幕，點字幕一下也能直接修改。',sel:'#edStage'},
+    {n:5,t:'刻度尺與播放頭',d:'每格代表 1 秒，紅色直線為播放頭，決定目前預覽到哪一個畫面、哪一句字幕。',sel:'#edRuler'},
+    {n:6,t:'時間軸三軌',d:'由上而下：① 字幕軌（最上方）② 影片軌（圖片／動畫）③ 音訊軌（AI 歌曲）。音樂一定要與影片完全對齊，否則影音不同步。',sel:'#edTracks'},
+    {n:7,t:'匯出 Export',d:'按 Export → 進入調整畫面 → OK 後再按一次 Export，即可下載影片檔案。',sel:'.ed-export'}
+  ];
+  $('#hsList').innerHTML=HS.map(h=>
+    '<div class="hsrow" data-hs="'+h.n+'"><b>'+h.n+'</b><div><h4>'+h.t+'</h4><p>'+h.d+'</p></div></div>').join('');
+
+  function setHS(n){
+    $$('.hsrow').forEach(r=>r.classList.toggle('on',+r.dataset.hs===n));
+    $$('.hl').forEach(x=>x.classList.remove('hl'));
+    const h=HS.filter(x=>x.n===n)[0];if(!h)return;
+    const t=$(h.sel);if(t){t.classList.add('hl');setTimeout(()=>t.classList.remove('hl'),2600);}
+  }
+  $('#hsList').addEventListener('click',e=>{const r=e.target.closest('.hsrow');if(r)setHS(+r.dataset.hs);});
+  document.addEventListener('click',e=>{const h=e.target.closest('.hot');if(h)setHS(+h.dataset.hs);});
+
+  $('#edRail').innerHTML=RAIL.map(r=>
+    '<button class="rail-b'+(r.k===curTool?' on':'')+'" data-tool="'+r.k+'"><span>'+r.ic+'</span><small>'+r.n+'</small></button>').join('');
+  function renderMedia(){
+    const m=MEDIA[curTool];
+    $('#edMedia').innerHTML='<h5>'+m.title+'</h5>'+m.items.map((it,i)=>
+      '<button class="med-i" data-t="'+curTool+'" data-i="'+i+'">'+
+        '<span class="th" style="background:linear-gradient(135deg,'+PAL[i%PAL.length]+',rgba(0,0,0,.4))">'+it.e+'</span>'+
+        '<span style="min-width:0"><b>'+it.n+'</b><span>'+it.sub+'</span></span></button>').join('')+
+      '<div class="note tip" style="margin-top:10px;font-size:11.5px">★ 小撇步：先把所有素材整理在一個資料夾內，匯入時一次拖曳。</div>';
+    $$('#edRail .rail-b').forEach(b=>b.classList.toggle('on',b.dataset.tool===curTool));
+  }
+  $('#edRail').addEventListener('click',e=>{
+    const b=e.target.closest('[data-tool]');if(!b)return;
+    curTool=b.dataset.tool;renderMedia();
+    $('#edMedia').classList.add('mobile-show');
+    if(window.innerWidth<=980)setTimeout(()=>$('#edMedia').classList.remove('mobile-show'),3000);
+  });
+  $('#edMedia').addEventListener('click',e=>{
+    const b=e.target.closest('.med-i');if(!b)return;
+    const it=MEDIA[b.dataset.t].items[+b.dataset.i];
+    if(it.k==='info'){toast(it.msg);return;}
+    if(it.k==='lyrics'){
+      clips.text=[
+        mk({n:'娘家的飯桌今年又少了我',dur:4,type:'text'}),
+        mk({n:'這根本就不是我想要煮的東西',dur:3,type:'text'}),
+        mk({n:'明天簽吧，我受夠了',dur:3,type:'text'}),
+        mk({n:'佛跳牆的味道不會改變，但我的人生可以',dur:4,type:'text'})
+      ];
+      toast('🅣 自動歌詞已放到最上方字幕軌（剪映內建只有簡體中文，記得轉繁體校正）');
+    }else if(it.k==='audio'){
+      clips.audio.push(mk({n:it.n,e:it.e,dur:it.dur,type:'audio'}));
+      toast('🎵 已加入最下方音訊軌：'+it.n);
+    }else{
+      clips.video.push(mk({n:it.n,e:it.e,dur:it.dur,type:it.k}));
+      toast((it.k==='anim'?'🌀 已加入動畫至影片軌（只能縮減，不能拉長）':'🖼️ 已加入中間影片軌：')+it.n);
+    }
+    selId=null;renderAll();
+  });
+
+  function totals(){
+    const s=k=>clips[k].reduce((a,c)=>a+c.dur,0);
+    return {video:s('video'),text:s('text'),audio:s('audio')};
+  }
+  function fmt(t){
+    const m=Math.floor(t/60),s=t-m*60;
+    return (m<10?'0':'')+m+':'+(s<10?'0':'')+s.toFixed(1);
+  }
+  function findClip(id){
+    const ks=['text','video','audio'];
+    for(let i=0;i<ks.length;i++){const f=clips[ks[i]].filter(c=>c.id===id)[0];if(f)return {c:f,k:ks[i]};}
+    return null;
+  }
+  function renderRuler(){
+    let h='';
+    for(let i=0;i<=TL;i++) h+='<i style="left:'+(i/TL*100)+'%'+(i%2===0?';font-weight:700':'')+'">'+(i%2===0?i:'')+'</i>';
+    h+='<div class="ed-head" id="edHead" style="left:'+(curTime/TL*100)+'%"></div>';
+    $('#edRuler').innerHTML=h;
+  }
+  function renderTracks(){
+    const tot=totals();
+    TL=Math.max(14,Math.ceil(Math.max(tot.video,tot.text,tot.audio)+2));
+    let h='';
+    ROWS.forEach((r,ri)=>{
+      const k=r.k;let x=0;let inner='';
+      if(!clips[k].length) inner='<div class="ed-empty">（空）從左側素材區加入</div>';
+      clips[k].forEach((c,i)=>{
+        const col=k==='audio'?'linear-gradient(135deg,#a855f7,#6d28d9)'
+          :k==='text'?'linear-gradient(135deg,#f59e0b,#ea580c)'
+          :'linear-gradient(135deg,'+PAL[i%PAL.length]+',rgba(0,0,0,.42))';
+        inner+='<div class="tclip'+(c.id===selId?' sel':'')+'" data-id="'+c.id+'" data-k="'+k+'"'+
+          ' style="left:'+(x/TL*100)+'%;width:'+(c.dur/TL*100)+'%;background:'+col+'" title="'+r.label+'｜'+c.n+' ・ '+c.dur.toFixed(1)+'s">'+
+          '<span style="overflow:hidden;text-overflow:ellipsis">'+(c.e?c.e+' ':'')+c.n+'</span><span class="rsz"></span></div>';
+        x+=c.dur;
+      });
+      h+='<div class="ed-track'+(ri===0?' top':'')+'"><span class="ed-tlab">'+r.label+'</span>'+
+         '<div class="ed-trow" data-k="'+k+'">'+inner+'</div></div>';
+    });
+    $('#edTracks').innerHTML=h;
+    renderRuler();renderAlign(tot);renderSelInfo();paintPreview();
+  }
+  function renderAlign(tot){
+    tot=tot||totals();
+    const ab=$('#alignBar');
+    let st,cls;
+    if(tot.audio===0){st='⚠️ 尚未加入音樂';cls='tag d';}
+    else if(Math.abs(tot.video-tot.audio)<=0.25){st='✓ 影音已完全對齊';cls='tag c';}
+    else{st='⛔ 影音未對齊 → 會不同步！';cls='tag e';}
+    let sub=tot.text>0&&tot.text<tot.video-0.25?' ・ <span style="color:var(--warn)">字幕未涵蓋全片</span>':'';
+    ab.innerHTML='<span style="color:var(--tx3)">字幕 '+tot.text.toFixed(1)+'s ・ 影片 '+tot.video.toFixed(1)+'s ・ 音樂 '+tot.audio.toFixed(1)+'s</span>'+sub+
+      '<span class="'+cls+'">'+st+'</span>';
+  }
+  function renderSelInfo(){
+    const f=selId?findClip(selId):null;
+    const info=$('#selInfo');
+    if(!f){info.textContent='未選取片段（點時間軸上的色塊選取）';
+      $('#actLen').disabled=$('#actShort').disabled=$('#actSplit').disabled=$('#actDel').disabled=true;return;}
+    const row=ROWS.filter(r=>r.k===f.k)[0];
+    info.innerHTML='已選取：<b style="color:var(--tx)">'+f.c.n+'</b> ・ '+row.label+'（'+row.pos+'） ・ '+f.c.dur.toFixed(1)+' 秒 ・ '+
+      (f.c.type==='anim'?'<span style="color:var(--bad)">動畫：只能縮減</span>':'<span style="color:var(--ok)">可拉長／縮減</span>');
+    $('#actLen').disabled=false;$('#actShort').disabled=f.c.dur<=0.5;
+    $('#actSplit').disabled=f.c.dur<1;$('#actDel').disabled=false;
+  }
+  function paintPreview(){
+    const tot=totals();
+    let x=0,v=null;
+    clips.video.forEach(c=>{if(curTime>=x&&curTime<x+c.dur)v=c;x+=c.dur;});
+    let y=0,t=null;
+    clips.text.forEach(c=>{if(curTime>=y&&curTime<y+c.dur)t=c;y+=c.dur;});
+    const stage=$('#edStage');
+    if(v){
+      const idx=clips.video.indexOf(v);
+      stage.style.background='radial-gradient(120% 120% at 50% 100%,'+PAL[idx%PAL.length]+'55,transparent 65%),#0b0b16';
+      $('#edScene').textContent=v.e||'🎬';
+      $('#edSceneN').textContent=v.n+' ・ '+(v.type==='anim'?'動畫素材':'圖片素材');
+    }else{
+      stage.style.background='#0b0b16';$('#edScene').textContent='🎬';
+      $('#edSceneN').textContent='（此時間點沒有影片素材）';
+    }
+    const sub=$('#edSub');
+    sub.textContent=t?t.n:'（無字幕）';
+    sub.classList.toggle('hit',!!t);
+    const maxT=Math.max(tot.video,tot.text,tot.audio,0.1);
+    $('#edTime').textContent=fmt(Math.min(curTime,maxT))+' / '+fmt(maxT);
+    $$('.tclip').forEach(el=>el.classList.toggle('play-now',el.dataset.id===(t?t.id:(v?v.id:''))));
+    const hd=$('#edHead');if(hd)hd.style.left=(curTime/TL*100)+'%';
+  }
+  function renderAll(){renderTracks();}
+
+  $('#edTracks').addEventListener('click',e=>{
+    if(e.target.closest('.rsz'))return;
+    const c=e.target.closest('.tclip');
+    selId=c?c.dataset.id:null;renderTracks();
+  });
+  $('#actLen').addEventListener('click',()=>{
+    const f=selId&&findClip(selId);if(!f)return;
+    if(f.c.type==='anim'){toast('⛔ 動畫只能縮減，不能拉長！');return;}
+    f.c.dur=Math.round((f.c.dur+0.5)*10)/10;renderAll();
+  });
+  $('#actShort').addEventListener('click',()=>{
+    const f=selId&&findClip(selId);if(!f)return;
+    f.c.dur=Math.max(0.5,Math.round((f.c.dur-0.5)*10)/10);renderAll();
+  });
+  $('#actSplit').addEventListener('click',()=>{
+    const f=selId&&findClip(selId);if(!f||f.c.dur<1)return;
+    const half=Math.round(f.c.dur/2*10)/10;
+    const idx=clips[f.k].indexOf(f.c);
+    const b=mk({n:f.c.n+' (B)',e:f.c.e,dur:f.c.dur-half,type:f.c.type});
+    f.c.dur=half;clips[f.k].splice(idx+1,0,b);selId=b.id;renderAll();toast('✂ 已分割為兩段');
+  });
+  $('#actDel').addEventListener('click',()=>{
+    const f=selId&&findClip(selId);if(!f)return;
+    clips[f.k]=clips[f.k].filter(c=>c.id!==f.c.id);selId=null;renderAll();toast('🗑 已刪除片段');
+  });
+  function seed(){
+    uid=0;
+    clips={
+      text:[mk({n:'娘家的飯桌今年又少了我',dur:4,type:'text'}),
+            mk({n:'這根本就不是我想要煮的東西',dur:3,type:'text'}),
+            mk({n:'明天簽吧，我受夠了',dur:3,type:'text'})],
+      video:[mk({n:'廚房・佛跳牆',e:'🍲',dur:4,type:'img'}),
+             mk({n:'試味道',e:'🥄',dur:3,type:'img'}),
+             mk({n:'轉場動畫',e:'✨',dur:2,type:'anim'}),
+             mk({n:'離婚協議書',e:'📄',dur:3,type:'img'})],
+      audio:[mk({n:'♪ AI 歌曲（Suno）',e:'🎵',dur:10,type:'audio'})]
+    };
+    selId=null;curTime=0;
+  }
+  $('#actReset').addEventListener('click',()=>{
+    stopPlay();seed();renderAll();
+    toast('↺ 已還原範例：字幕軌（上）10s ・ 影片軌（中）12s ・ 音訊軌（下）10s → 影音未對齊');
+  });
+
+  let drag=null;
+  $('#edTracks').addEventListener('pointerdown',e=>{
+    const h=e.target.closest('.rsz');if(!h)return;
+    const f=findClip(h.parentElement.dataset.id);if(!f)return;
+    if(f.c.type==='anim'){toast('⛔ 動畫只能縮減，不能拉長！');return;}
+    drag={id:f.c.id,startX:e.clientX,startDur:f.c.dur,row:h.closest('.ed-trow')};
+    selId=f.c.id;e.preventDefault();
+  });
+  window.addEventListener('pointermove',e=>{
+    if(!drag)return;
+    const f=findClip(drag.id);if(!f)return;
+    const rect=drag.row.getBoundingClientRect();
+    const pps=rect.width/TL;
+    let nd=drag.startDur+(e.clientX-drag.startX)/pps;
+    f.c.dur=Math.max(0.5,Math.round(nd*2)/2);
+    renderTracks();
+  });
+  window.addEventListener('pointerup',()=>{
+    if(!drag)return;drag=null;
+    const tot=totals();
+    if(tot.audio>0&&Math.abs(tot.video-tot.audio)<=0.25)toast('✅ 音樂已與影片完全對齊！');
+  });
+
+  function stopPlay(){playing=false;clearInterval(timer);timer=null;$('#edPlay').textContent='▶';}
+  function startPlay(){
+    const tot=totals();const maxT=Math.max(tot.video,tot.text,tot.audio);
+    if(maxT<=0){toast('時間軸是空的，先從素材區加入素材');return;}
+    if(curTime>=maxT)curTime=0;
+    playing=true;$('#edPlay').textContent='⏸';
+    timer=setInterval(()=>{
+      curTime+=0.1;
+      if(curTime>=maxT){curTime=maxT;paintPreview();stopPlay();toast('🎬 預覽結束');return;}
+      paintPreview();
+    },100);
+  }
+  $('#edPlay').addEventListener('click',()=>{playing?stopPlay():startPlay();});
+  $('#edPrev').addEventListener('click',()=>{stopPlay();curTime=0;paintPreview();});
+  $('#edNext').addEventListener('click',()=>{
+    stopPlay();const tot=totals();curTime=Math.max(tot.video,tot.text,tot.audio);paintPreview();
+  });
+  $('#edRuler').addEventListener('click',e=>{
+    const r=$('#edRuler').getBoundingClientRect();
+    curTime=Math.max(0,Math.min(TL,(e.clientX-r.left)/r.width*TL));
+    stopPlay();paintPreview();
+  });
+  $('#edExport').addEventListener('click',()=>{
+    const tot=totals();
+    if(tot.video===0){toast('⛔ 影片軌沒有素材，無法匯出');return;}
+    if(tot.audio===0){toast('⛔ 音訊軌還沒加入音樂！飲食文學影片「背景音樂一定要給」');return;}
+    if(Math.abs(tot.video-tot.audio)>0.25){toast('⚠️ 影音未對齊，匯出會不同步！先把音樂拉到與影片等長');return;}
+    if(tot.text===0){toast('⚠️ 字幕軌是空的，建議先用「自動歌詞」產生字幕');return;}
+    toast('✅ 已匯出「'+($('#projName').value||'我的專案')+'.mp4」→ 檔案在你設置的資料夾中');
+  });
+
+  seed();renderMedia();renderAll();
+  window.addEventListener('resize',()=>renderRuler());
+})();
+
+/* ---------- 剪映八步驟 ---------- */
+const CC=[
+ {t:'進入工作介面',s:'Step 1',body:
+  '<h3>一、進入剪映工作介面</h3><p>可使用 <b>Google 帳號登入</b>。線上版與電腦版皆可，<b style="color:var(--acc2)">紅圈處點進去就是製作影片的工作介面！</b></p>'+
+  '<div class="tblwrap mt"><table class="tbl"><thead><tr><th>分類</th><th>說明</th></tr></thead><tbody>'+
+  '<tr><td><b>線上版</b></td><td>capcut.com 登入後，點選專案 / 建立新專案進入編輯器。</td></tr>'+
+  '<tr><td><b>電腦版</b></td><td>下載安裝後開啟，點選「开始创作 / New Project」進入工作介面。</td></tr></tbody></table></div>'+
+  '<div class="note tip">★ 小撇步：可以<b>先將所有素材整理在一個資料夾內</b>，之後匯入只要一次拖曳。</div>'},
+ {t:'匯入素材',s:'Step 2',body:
+  '<h3>二、將素材複製至素材區</h3><p>把影片所需素材（<b>十張圖片跟歌曲</b>）複製至素材區，<b style="color:var(--acc2)">紅圈處就是素材區！</b></p>'+
+  '<ul class="list mt"><li>線上版：拖曳檔案進媒體區，或點「上傳」。</li><li>電腦版：把整理好的資料夾內容一次拖入素材區。</li></ul>'+
+  '<div class="note warn">歌曲素材要先在 Suno 下載 MP3；<b>免費版終生只能下載 7 次</b>，請確認版本後再下載。</div>'+
+  '<div class="row mt"><button class="btn ghost sm" data-go="editor">🎛️ 到上一站的介面模擬器實際加入素材</button></div>'},
+ {t:'拖曳時間軸',s:'Step 3',body:
+  '<h3>三、素材拖曳至時間軸並排序</h3><p>將需要的素材拖到<b>時間軸</b>，依自己的喜好排序。時間軸由上而下為'+
+  '<b style="color:var(--warn)">字幕軌（最上方）</b> → <b style="color:var(--acc2)">影片軌（中間）</b> → <b style="color:var(--acc)">音訊軌（最下方）</b>，'+
+  '上方刻度每格 1 秒，紅色直線為播放頭。</p>'+
+  '<div class="note warn"><b>重要說明：</b>圖片可以拉長時間（<b>往右拖曳即可</b>），<b>動畫只能縮減，不能拉長！</b></div>'+
+  '<div class="note tip">在模擬器中：點片段選取 → 拖右側白色把手，或用「＋拉長／－縮短／✂分割／🗑刪除」。</div>'},
+ {t:'音樂對齊',s:'Step 4',body:
+  '<h3>四、將音樂拖曳至時間軸</h3><p>把 Suno 生成的歌曲拖到<b>最下方的音訊軌</b>，一首歌串連整支影片即可。</p>'+
+  '<div class="note warn"><b>說明：</b>音樂部分（紅圈處）<b>一定要跟影片部分完全對齊</b>，不然會變成<b>影音不同步</b>！一部完整的影片架構就包含了上述元素（字幕軌＋影片軌＋音訊軌）。</div>'+
+  '<div class="row mt"><button class="btn ghost sm" data-go="editor">🎯 去模擬器完成「對齊挑戰」</button></div>'},
+ {t:'字幕 → 自動歌詞',s:'Step 5',body:
+  '<h3>五、上歌詞字幕（一）進入字幕部分 ・（二）選擇「字幕歌詞」</h3>'+
+  '<div class="tblwrap"><table class="tbl"><thead><tr><th>分類</th><th>操作</th></tr></thead><tbody>'+
+  '<tr><td><b>線上版</b></td><td>點「字幕」進去 → ① 點<b>自動歌詞</b>進去 ② 可選擇語言（<b>中文歌就選簡體中文</b>）③ 按「產生」便可生成歌詞字幕。</td></tr>'+
+  '<tr><td><b>電腦版</b></td><td>點 <b>Captions</b> 進去 → ① 點 <b>Auto lyrics</b> ② 選擇語言（<b>中文歌就選 Chinese</b>）③ 按下產生即可生成歌詞字幕。</td></tr></tbody></table></div>'+
+  '<div class="note">生成的字幕會出現在<b>時間軸最上方的字幕軌</b>，疊加在影片軌的畫面上顯示。</div>'},
+ {t:'字幕校正',s:'Step 6',body:
+  '<h3>五（三）字幕校正</h3><p>最上方的<b>橘色白字部分即為字幕</b>；左邊紅圈處即為歌詞字幕，可以直接在此處修改，也可以按右邊的 <kbd>T 基礎</kbd> 進行字幕修改。</p>'+
+  '<ul class="list"><li>電腦版：紅圈處 <b>lyrics</b> 即為歌詞字幕，可直接修改。</li><li>可一邊預覽影片成果（按三角形播放），一邊檢查字幕是否正確。</li><li>看到錯誤處，可直接點預覽畫面上的字幕一下進行修改。</li></ul>'+
+  '<div class="note warn"><b>注意：</b>剪映內建只有簡體中文，建議可先將歌詞部分<b>轉成繁體中文，另存文字檔</b>，在校正時直接複製貼上。</div>'},
+ {t:'字形與顏色',s:'Step 7',body:
+  '<h3>五（四）字幕的字形顏色調整</h3>'+
+  '<div class="tblwrap"><table class="tbl"><thead><tr><th>分類</th><th>操作</th></tr></thead><tbody>'+
+  '<tr><td><b>線上版</b></td><td>「T 基礎」（紅圈處），字幕下面就可以修改<b>字型大小與字體</b>。</td></tr>'+
+  '<tr><td><b>電腦版</b></td><td><b>Text</b> 包含了校正字幕、選擇字體、調整字幕字體大小等功能，請大家自行嘗試！</td></tr></tbody></table></div>'+
+  '<div class="row mt"><span class="tag">字體</span><span class="tag">字級</span><span class="tag">顏色</span><span class="tag">描邊</span><span class="tag">陰影</span><span class="tag">位置</span><span class="tag">動畫</span></div>'},
+ {t:'匯出影片',s:'Step 8',body:
+  '<h3>六、匯出影片 → 完成</h3><p>剪輯完成後，要經過匯出流程，才能變成一部完整影片。</p>'+
+  '<ul class="list">'+
+   '<li><b>線上版：</b>可先把<b>專案名稱</b>（紅圈處）改成你幫影片取好的名稱，這樣匯出時就不用另外取檔名了，接著按「匯出」→ 按「下載」進入匯出設定 → 設定好條件後，按最後一次匯出，就可下載影片檔案。</li>'+
+   '<li><b>電腦版：</b>先改專案名稱 → 按 <b>Export</b> → 進入調整畫面 → OK 後再按一次 <b>Export</b> 即可匯出。</li>'+
+   '<li>電腦版剪映會跳出提醒視窗（不想有浮水印需付費商用），我們沒差，<b>直接按紅圈處</b>。</li></ul>'+
+  '<div class="note tip"><b>六、完成：</b>跑完流程後，影片檔案就會出現在你設置的資料夾中！</div>'}
+];
+const ccStepper=$('#ccStepper'),ccBody=$('#ccBody'),ccCount=$('#ccCount');
+let ccIdx=0;
+ccStepper.innerHTML=CC.map((s,i)=>'<button class="stp" data-i="'+i+'"><b>'+(i+1)+'</b><span>'+s.t+'</span></button>').join('');
+function renderCC(){
+  $$('.stp',ccStepper).forEach((b,i)=>b.classList.toggle('on',i===ccIdx));
+  ccBody.innerHTML=CC[ccIdx].body;
+  ccCount.textContent='步驟 '+(ccIdx+1)+' / '+CC.length+' ・ '+CC[ccIdx].s;
+  ccBody.style.animation='none';void ccBody.offsetWidth;ccBody.style.animation='fade .45s cubic-bezier(.22,.75,.25,1)';
+  $('#ccPrev').disabled=ccIdx===0;
+  $('#ccNext').textContent=ccIdx===CC.length-1?'✓ 完成流程':'下一步 →';
+}
+ccStepper.addEventListener('click',e=>{const b=e.target.closest('.stp');if(!b)return;ccIdx=+b.dataset.i;renderCC();});
+$('#ccPrev').addEventListener('click',()=>{if(ccIdx>0){ccIdx--;renderCC();}});
+$('#ccNext').addEventListener('click',()=>{
+  if(ccIdx<CC.length-1){ccIdx++;renderCC();}else toast('🎉 八步驟完成，影片檔案已在你的資料夾中！');
+});
+renderCC();
+
+/* ---------- 測驗 ---------- */
+const QUIZ=[
+ {q:'Suno AI 免費版每天提供多少 credits？',o:['10 credits','50 credits','100 credits','500 credits'],a:1,
+  e:'教材：免費額度為<b>一天 50 credits</b>，一首歌 5 credits。'},
+ {q:'在 Suno AI 生成一首歌需要消耗多少 credits？',o:['1 credit','3 credits','5 credits','10 credits'],a:2,
+  e:'一首歌 <b>5 credits</b>；因系統預設每次生成兩首，所以一次消耗 10 credits。'},
+ {q:'依 2026 年新規定，免費版帳號「終生」總共可以下載幾次歌曲的 MP3？',o:['每天 5 次','每月 7 次','終生 7 次','終生 50 次'],a:2,
+  e:'2026 年新規定：<b>免費版帳號終生只能下載 7 次歌曲的 MP3</b>；次數用完須升級 Pro / Premier 才能繼續下載。'},
+ {q:'系統預設每次生成兩首歌，這兩首歌的關係是？',o:['相同歌詞、相同旋律','相同歌詞、不同旋律','不同歌詞、相同旋律','完全隨機無關'],a:1,
+  e:'教材流程圖：輸入歌曲描述 → 生成兩個歌曲版本 → <b>相同歌詞、不同旋律</b> → 聆聽歌曲。'},
+ {q:'若希望生成的歌曲可以商用，應該怎麼做？',o:['多等幾天再生成','升級 Pro Plan 或 Premier Plan','把歌曲重新命名','開啟 Instrumental'],a:1,
+  e:'<b>付費方案生成的歌曲可拿來商用</b>；免費版僅供個人使用。'},
+ {q:'想要自己填歌詞、指定音樂風格與歌曲名稱，應使用哪種模式？',o:['Prompt 模式','Custom 自訂模式','Explore 模式','Upload Audio'],a:1,
+  e:'<b>Custom 自訂模式</b>可設定音樂風格（Style of Music）、自訂歌詞（Lyrics）、歌曲名稱（Title）。'},
+ {q:'開啟 Instrumental 開關會產生什麼結果？',o:['加入合音','變成純音樂演奏，沒有人聲','歌曲變快','自動生成歌詞'],a:1,
+  e:'Instrumental 是人聲演唱與純音樂的切換，<b>開啟時為純音樂演奏</b>。'},
+ {q:'流行歌曲結構中，情緒最強烈、最容易被記住且通常重複出現的段落是？',o:['前奏 Intro','主歌 Verse','副歌 Chorus','尾奏 Outro'],a:2,
+  e:'<b>副歌 Chorus</b> 是歌曲的記憶點，承載核心訊息，通常重複出現。'},
+ {q:'剪映時間軸由上而下的軌道順序是？',o:['影片軌 → 字幕軌 → 音訊軌','字幕軌 → 影片軌 → 音訊軌','音訊軌 → 影片軌 → 字幕軌','字幕軌 → 音訊軌 → 影片軌'],a:1,
+  e:'<b>字幕軌在最上方</b>（才能疊加在畫面上）→ 中間是影片軌（圖片／動畫）→ <b>最下方是音訊軌</b>（配樂）。'},
+ {q:'剪映時間軸中，關於素材長度的調整，下列何者正確？',o:['圖片與動畫都能任意拉長','圖片可往右拖曳拉長，動畫只能縮減不能拉長','動畫可拉長，圖片只能縮減','兩者都只能縮減'],a:1,
+  e:'教材說明：<b>圖片可以拉長時間（往右拖曳即可），動畫只能縮減，不能拉長！</b>'},
+ {q:'為什麼建議先把歌詞轉成繁體中文另存文字檔？',o:['為了減少檔案大小','剪映內建只有簡體中文，方便校正時複製貼上','Suno 只支援繁體中文','平台規定'],a:1,
+  e:'<b>剪映內建只有簡體中文</b>，建議先將歌詞轉成繁體中文另存文字檔，在校正時直接複製貼上。'},
+ {q:'關於剪映兩個版本，下列敘述何者正確？',o:['中國版剪映有線上網頁版','國際版 CapCut 有線上網頁版可直接操作，電腦版為英文介面','兩個版本都有繁體中文電腦版','國際版只能手機使用'],a:1,
+  e:'國際版（CapCut）：<b>有線上網頁版可直接操作</b>，電腦版為英文介面；中國版（剪映）無網頁版，電腦版為簡體中文。'}
+];
+const qbox=$('#quizBox');let answered=0,score=0;
+function renderQuiz(){
+  answered=0;score=0;
+  qbox.innerHTML=QUIZ.map((item,qi)=>
+   '<div class="qcard" data-q="'+qi+'"><div class="qtitle"><span class="qn">'+(qi+1)+'</span><span>'+item.q+'</span></div>'+
+     '<div class="opts">'+item.o.map((op,oi)=>'<div class="opt" data-oi="'+oi+'"><span class="k">'+'ABCD'[oi]+'</span><span>'+op+'</span></div>').join('')+'</div>'+
+     '<div class="exp" id="exp'+qi+'"></div></div>').join('');
+  $('#qFill').style.width='0%';$('#qCount').textContent='已答 0 / '+QUIZ.length;
+  $('#scoreBox').classList.remove('show');$('#scoreBox').innerHTML='';
+}
+qbox.addEventListener('click',e=>{
+  const op=e.target.closest('.opt');if(!op||op.classList.contains('locked'))return;
+  const card=op.closest('.qcard'),qi=+card.dataset.q,oi=+op.dataset.oi,item=QUIZ[qi];
+  $$('.opt',card).forEach(o=>o.classList.add('locked'));
+  const right=oi===item.a;
+  op.classList.add(right?'right':'wrong');
+  if(!right)$$('.opt',card)[item.a].classList.add('right');
+  card.classList.add('answered',right?'ok':'no');
+  const exp=$('#exp'+qi);
+  exp.innerHTML=(right?'✅ <b>答對！</b>':'❌ <b>答錯。</b>正確答案：'+'ABCD'[item.a]+'。')+' '+item.e;
+  exp.classList.add('show');
+  answered++;if(right)score++;
+  $('#qFill').style.width=(answered/QUIZ.length*100)+'%';
+  $('#qCount').textContent='已答 '+answered+' / '+QUIZ.length;
+  if(answered===QUIZ.length)finishQuiz();
+});
+function finishQuiz(){
+  const pct=Math.round(score/QUIZ.length*100);
+  const grade=pct>=90?'🏆 太強了！你已經可以當助教':pct>=70?'🎉 很好！再複習幾個小地方就滿分':pct>=50?'📖 不錯，建議回到對應章節再看一次':'🔁 別氣餒，重新學習一遍再挑戰';
+  const box=$('#scoreBox');
+  box.innerHTML='<div class="big grad">'+score+' <span style="font-size:26px;color:var(--tx3)">/ '+QUIZ.length+'</span></div>'+
+   '<p style="font-size:15px;margin-top:8px;color:var(--tx)">正確率 '+pct+'% ・ '+grade+'</p>'+
+   '<div class="row mt" style="justify-content:center"><button class="btn pri sm" id="againBtn">↻ 再測一次</button>'+
+   '<button class="btn ghost sm" data-go="task">前往實作任務 →</button></div>';
+  box.classList.add('show');
+  $('#againBtn').addEventListener('click',()=>{renderQuiz();go('quiz');});
+  box.scrollIntoView({behavior:'smooth',block:'center'});
+  if(pct>=70)toast('🎉 測驗完成，正確率 '+pct+'%');
+}
+$('#quizReset').addEventListener('click',()=>{renderQuiz();toast('已重新開始');});
+renderQuiz();
+
+/* ---------- 任務清單 ---------- */
+const TASKS=[
+ ['註冊／登入 Suno AI，點進側邊欄 Create 認識介面','suno'],
+ ['確認自己的免費版「終生 MP3 下載額度」剩餘次數（共 7 次，2026 新規）','suno'],
+ ['用 Prompt 模式輸入 Song Description，生成一首歌並聆聽兩個版本','suno'],
+ ['切換 Custom 模式，認識 Lyrics / Instrumental / Style of Music / Exclude Styles / Title 五個欄位','suno'],
+ ['用 Prompt 實驗室產出描述與歌詞，填入 Custom 模式生成第二首歌','lab'],
+ ['向 ChatGPT 提問：給出題材並請它推薦適合的音樂風格','gpt'],
+ ['追問 ChatGPT「請幫我寫歌詞」，取得含 Verse / Chorus / Bridge 的完整歌詞','gpt'],
+ ['把歌詞與風格貼進 Suno，為歌曲命名 Title 並生成；確定版本後才下載 MP3','structure'],
+ ['撰寫 4 段分鏡腳本（分段／內容／配樂／預估秒數）','script'],
+ ['蒐集素材：至少 10 張 AI 生成圖片 + 1 首 AI 歌曲，整理在同一個資料夾','assets'],
+ ['認出剪映介面分區：工具列／素材區／預覽區／時間軸／匯出','editor'],
+ ['認出時間軸軌道順序：字幕軌（最上）→ 影片軌（中）→ 音訊軌（最下）','editor'],
+ ['把素材拖到時間軸並排序，練習拉長圖片、縮減動畫','editor'],
+ ['把音樂拖到最下方音訊軌，並與影片「完全對齊」（避免影音不同步）','editor'],
+ ['使用「自動歌詞／Auto lyrics」產生字幕軌，並校正為繁體中文','capcut'],
+ ['調整字幕字體、大小與顏色，並預覽檢查','capcut'],
+ ['修改專案名稱 → 匯出（Export）→ 下載影片檔案','capcut']
+];
+const done=new Set(store.get('ai-tasks',[]));
+$('#taskList').innerHTML=TASKS.map((t,i)=>
+ '<div class="task'+(done.has(i)?' on':'')+'" data-i="'+i+'">'+
+   '<span class="box"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>'+
+   '<span>'+t[0]+'</span></div>').join('');
+function updateTask(){
+  const pct=Math.round(done.size/TASKS.length*100);
+  $('#taskArc').setAttribute('stroke-dashoffset',(100-pct));
+  $('#taskPct').textContent=pct+'%';
+  $('#taskCnt').textContent=done.size+' / '+TASKS.length+' 完成';
+  store.set('ai-tasks',Array.from(done));
+  if(pct===100)toast('🎊 全部任務完成！');
+}
+$('#taskList').addEventListener('click',e=>{
+  const t=e.target.closest('.task');if(!t)return;
+  const i=+t.dataset.i;
+  if(done.has(i))done.delete(i);else done.add(i);
+  t.classList.toggle('on',done.has(i));updateTask();
+});
+$('#taskClear').addEventListener('click',()=>{done.clear();$$('.task').forEach(t=>t.classList.remove('on'));updateTask();toast('已清除任務進度');});
+updateTask();
+
+/* ---------- 初始化 ---------- */
+bindReveal();
+new MutationObserver(()=>bindReveal()).observe(document.body,{childList:true,subtree:true});
+setTimeout(bindReveal,400);
+})();
+</script>
+</body>
+</html>
